@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reddit Media Downloader options</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <img src="/icon.svg" width="48" height="48" alt="" />
+        <div>
+          <h1>Reddit Media Downloader</h1>
+          <p>Download preferences</p>
+        </div>
+      </header>
+
+      <form id="settings-form">
+        <section>
+          <h2>Videos shown in the popup</h2>
+          <label>
+            <select id="detection-mode" name="detectionMode">
+              <option value="opened">Opened embeds only</option>
+              <option value="all">All supported links loaded on the page</option>
+            </select>
+          </label>
+          <p class="hint">
+            Opened embeds only keeps the list focused on videos you expanded in Reddit.
+          </p>
+        </section>
+
+        <section>
+          <h2>Video quality</h2>
+          <label>
+            <select id="quality" name="quality">
+              <option value="hd">Prefer HD, then SD</option>
+              <option value="sd">Prefer SD, then HD</option>
+            </select>
+          </label>
+          <p class="hint">Only complete, non-silent MP4 variants are selected.</p>
+        </section>
+
+        <section>
+          <h2>Downloads</h2>
+          <label class="check-row">
+            <input id="save-as" name="saveAs" type="checkbox" />
+            Always ask where to save each video
+          </label>
+        </section>
+
+        <section>
+          <h2>Filename</h2>
+          <label for="filename-template">Template</label>
+          <input id="filename-template" name="filenameTemplate" maxlength="160" required />
+          <p class="hint">
+            Available fields: <code>{sourceCreator}</code> (for example, the Redgifs uploader's
+            display name), <code>{creator}</code> (Reddit user), <code>{title}</code>,
+            <code>{provider}</code>, and <code>{id}</code>. Use <code>|</code> for fallback, such as
+            <code>{sourceCreator|creator}</code>.
+          </p>
+        </section>
+
+        <section>
+          <h2>Providers</h2>
+          <label class="check-row">
+            <input type="checkbox" checked disabled />
+            Redgifs
+          </label>
+          <p class="hint">
+            Redgifs access is requested only when you click Download for the first time.
+          </p>
+        </section>
+
+        <div class="actions">
+          <button type="submit">Save changes</button>
+          <span id="save-status" role="status" aria-live="polite"></span>
+        </div>
+      </form>
+
+      <aside>
+        <strong>Privacy</strong>
+        <p>
+          No analytics, accounts, browsing history, or external extension backend. Provider metadata
+          is requested only for the video you choose.
+        </p>
+      </aside>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

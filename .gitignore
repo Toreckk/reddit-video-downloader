@@ -1,0 +1,8 @@
+node_modules/
+.output/
+.wxt/
+coverage/
+web-ext-artifacts/
+*.log
+.DS_Store
+Thumbs.db

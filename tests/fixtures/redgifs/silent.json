@@ -1,0 +1,10 @@
+{
+  "gif": {
+    "id": "SilentSource",
+    "urls": {
+      "hd": "https://media.redgifs.com/SilentSource.mp4",
+      "silent": "https://media.redgifs.com/SilentSource-silent.mp4"
+    },
+    "hasAudio": false
+  }
+}

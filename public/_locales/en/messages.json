@@ -1,0 +1,11 @@
+{
+  "extensionName": {
+    "message": "Reddit Media Downloader"
+  },
+  "extensionDescription": {
+    "message": "Download supported videos embedded in Reddit posts. Redgifs is supported first."
+  },
+  "actionTitle": {
+    "message": "Find downloadable videos"
+  }
+}

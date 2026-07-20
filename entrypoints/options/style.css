@@ -1,0 +1,135 @@
+:root {
+  color-scheme: light dark;
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+  background: #f4f5f6;
+  color: #1c1c1c;
+}
+
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+main {
+  width: min(680px, calc(100% - 32px));
+  margin: 42px auto;
+}
+header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+header img {
+  border-radius: 12px;
+}
+h1 {
+  margin: 0;
+  font-size: 24px;
+}
+header p {
+  margin: 4px 0 0;
+  color: #666;
+}
+form,
+aside {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 14px;
+}
+section {
+  padding: 20px 22px;
+  border-bottom: 1px solid #e5e5e5;
+}
+h2 {
+  margin: 0 0 12px;
+  font-size: 16px;
+}
+label {
+  display: block;
+  font-size: 14px;
+}
+select,
+input[type='text'],
+input:not([type]) {
+  width: 100%;
+  margin-top: 7px;
+  border: 1px solid #aaa;
+  border-radius: 8px;
+  padding: 9px 10px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.hint {
+  margin: 8px 0 0;
+  color: #666;
+  font-size: 12px;
+}
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 22px;
+}
+button {
+  border: 0;
+  border-radius: 999px;
+  padding: 9px 16px;
+  background: #ff4500;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+#save-status {
+  color: #26713d;
+  font-size: 13px;
+}
+aside {
+  margin-top: 16px;
+  padding: 18px 22px;
+  font-size: 13px;
+}
+aside p {
+  margin: 7px 0 0;
+  color: #666;
+  line-height: 1.5;
+}
+:focus-visible {
+  outline: 3px solid #2f75d0;
+  outline-offset: 2px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    background: #17181a;
+    color: #f3f3f3;
+  }
+  form,
+  aside {
+    background: #232427;
+    border-color: #404146;
+  }
+  section {
+    border-color: #404146;
+  }
+  header p,
+  .hint,
+  aside p {
+    color: #b0b2b6;
+  }
+}

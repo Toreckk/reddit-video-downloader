@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reddit Media Downloader</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body data-state="scanning">
+    <header>
+      <div>
+        <h1>Media Downloader</h1>
+        <p>HD + audio preferred</p>
+      </div>
+      <nav aria-label="Extension actions">
+        <button
+          id="refresh"
+          class="icon-button"
+          type="button"
+          title="Scan again"
+          aria-label="Scan again"
+        >
+          ↻
+        </button>
+        <button
+          id="options"
+          class="icon-button"
+          type="button"
+          title="Options"
+          aria-label="Open options"
+        >
+          ⚙
+        </button>
+      </nav>
+    </header>
+    <main>
+      <div class="list-tools">
+        <label class="search-field">
+          <span class="visually-hidden">Filter detected videos</span>
+          <input
+            id="media-search"
+            type="search"
+            placeholder="Search title, user, subreddit…"
+            autocomplete="off"
+            disabled
+          />
+        </label>
+        <button id="clear-shown" class="clear-button" type="button" disabled>Clear shown</button>
+      </div>
+      <div id="status" class="page-status" role="status" aria-live="polite">
+        Finding supported videos…
+      </div>
+      <ul id="media-list" class="media-list" aria-label="Detected media"></ul>
+    </main>
+    <footer>Only the video you choose is requested from its provider.</footer>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,36 @@
+{
+  "name": "reddit-video-downloader",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A modular Firefox extension for downloading videos embedded in Reddit posts.",
+  "scripts": {
+    "dev": "wxt -b firefox --mv3",
+    "dev:firefox": "wxt -b firefox --mv3",
+    "build": "wxt build -b firefox --mv3",
+    "build:firefox": "wxt build -b firefox --mv3",
+    "zip": "wxt zip -b firefox --mv3",
+    "zip:firefox": "wxt zip -b firefox --mv3",
+    "prepare": "wxt prepare",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check:manifest": "node scripts/check-firefox-manifest.mjs",
+    "lint:extension": "web-ext lint --source-dir .output/firefox-mv3",
+    "verify": "npm run format:check && npm run typecheck && npm run lint && npm run test && npm run build:firefox && npm run check:manifest && npm run lint:extension"
+  },
+  "devDependencies": {
+    "@types/firefox-webext-browser": "^143.0.0",
+    "eslint": "^10.7.0",
+    "happy-dom": "^20.11.0",
+    "prettier": "^3.9.5",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.64.0",
+    "vitest": "^4.1.10",
+    "web-ext": "^10.5.0",
+    "wxt": "^0.20.27"
+  }
+}
