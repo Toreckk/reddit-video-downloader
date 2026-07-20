@@ -38,7 +38,7 @@ jobs:
           cp .output/*-sources.zip artifacts/
 
       - name: Upload unsigned Firefox artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: reddit-video-downloader-firefox
           path: artifacts/*.zip
