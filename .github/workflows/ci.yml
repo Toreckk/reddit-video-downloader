@@ -31,11 +31,15 @@ jobs:
       - name: Create release and source archives
         run: npm run zip:firefox
 
+      - name: Stage unsigned Firefox artifacts
+        run: |
+          mkdir -p artifacts
+          cp .output/*-firefox.zip artifacts/
+          cp .output/*-sources.zip artifacts/
+
       - name: Upload unsigned Firefox artifacts
         uses: actions/upload-artifact@v6
         with:
           name: reddit-video-downloader-firefox
-          path: |
-            .output/*-firefox.zip
-            .output/*-sources.zip
+          path: artifacts/*.zip
           if-no-files-found: error
