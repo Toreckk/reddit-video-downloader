@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.2.1 (2026-07-21)
+
+### Notable changes
+
+#### Reliable Firefox permissions
+
+- Add a one-time setup page that requests Reddit, Redgifs, and `v.redd.it` access from a valid
+  extension-owned user action.
+- Reload open Reddit tabs after access is granted so inline Download actions appear immediately.
+- Show a permission-specific error instead of reporting missing provider access as a network failure.
+
+#### Release workflow
+
+- Stage each version on a `release/vX.Y.Z` branch with its package version and curated changelog.
+- Create the GitHub Release and submit the same version to Mozilla automatically after the reviewed
+  release pull request is merged into `master`.
+
+### Other changes
+
+- Use the general description “Download videos directly from Reddit posts.”
+- Declare Firefox for Android 142 as the Android-specific minimum while retaining Firefox Desktop 140
+  support, removing the Mozilla validator warning.
+- Remove the obsolete pre-implementation plan and refresh contributor, testing, and release guidance.
+
 ## 0.2.0 (2026-07-21)
 
 ### Features
