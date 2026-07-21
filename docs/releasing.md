@@ -34,14 +34,21 @@ Merging the release pull request starts `.github/workflows/release.yml`:
 2. Skip publication if tag `vX.Y.Z` already exists.
 3. Read the Mozilla credentials from the `firefox-publishing` GitHub environment.
 4. Run the complete verification suite and create the Firefox and source archives.
-5. Submit the extension and source archive to Mozilla with the configured channel.
-6. For an unlisted version, wait for Mozilla signing and collect the signed XPI.
-7. Create tag `vX.Y.Z` and the GitHub Release at the exact merge commit using the curated changelog.
-8. Attach the signed XPI where applicable plus the unsigned Firefox review archive and source archive.
-9. Refresh the GitHub Pages update manifests.
+5. Create a draft GitHub Release at the exact merge commit with the review and source archives.
+6. Submit the extension and source archive to Mozilla once, without waiting in the runner for review.
+7. Run `.github/workflows/firefox-release-finalizer.yml` immediately and every 15 minutes.
+8. When Mozilla marks an unlisted file public, download and verify the signed XPI, attach it to the
+   draft, publish the tag and GitHub Release, and refresh the GitHub Pages update manifests.
 
-If signing or validation fails, no stable tag or GitHub Release is created. Fix the version branch,
-advance to a new version if Mozilla already accepted the failed version, and submit a new release PR.
+The draft release is the durable handoff between submission and signing, so Mozilla reviews may take
+hours or days without losing release state. The finalizer is idempotent and can also be started safely
+with **Actions -> Firefox release finalizer -> Run workflow**; it never submits a version again.
+Do not rerun the original submission workflow after Mozilla accepted a version.
+
+If validation fails before Mozilla accepts the version, inspect the Release workflow and the draft.
+Fix the version branch, advance to a new version when Mozilla already owns the failed version number,
+and submit a new release pull request. Delete an abandoned draft only after confirming that its AMO
+submission will not be completed.
 
 For unattended stable publication, keep the Mozilla secrets in `firefox-publishing` but do not set a
 required reviewer on that environment. The reviewed pull request is the human release gate. Restrict

@@ -8,8 +8,6 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 concurrency:
   group: stable-release
@@ -75,50 +73,40 @@ jobs:
           FIREFOX_CHANNEL: ${{ steps.firefox.outputs.channel }}
           FIREFOX_UPDATE_URL: ${{ steps.firefox.outputs.update_url }}
 
-      - name: Sign or submit Firefox package
-        run: |
-          source_zip=$(find .output -maxdepth 1 -name '*-sources.zip' -print -quit)
-          test -n "$source_zip"
-          approval_timeout=1800000
-          metadata_arguments=()
-          if [ "${{ steps.firefox.outputs.channel }}" = "listed" ]; then
-            approval_timeout=0
-            metadata_arguments=(--amo-metadata amo-metadata.json)
-          fi
-          WEB_EXT_UPLOAD_SOURCE_CODE="$source_zip" node node_modules/web-ext/bin/web-ext.js sign \
-            --source-dir .output/firefox-mv3 \
-            --artifacts-dir signed-artifacts \
-            --approval-timeout "$approval_timeout" \
-            "${metadata_arguments[@]}" \
-            --no-input
-        env:
-          WEB_EXT_API_KEY: ${{ secrets.FIREFOX_JWT_ISSUER }}
-          WEB_EXT_API_SECRET: ${{ secrets.FIREFOX_JWT_SECRET }}
-          WEB_EXT_CHANNEL: ${{ steps.firefox.outputs.channel }}
-
-      - name: Prepare release assets and notes
+      - name: Prepare pending release assets and notes
         run: |
           mkdir -p release-assets
           cp .output/*-firefox.zip release-assets/
           cp .output/*-sources.zip release-assets/
-          if [ "${{ steps.firefox.outputs.channel }}" = "unlisted" ]; then
-            signed_xpi=$(find signed-artifacts -maxdepth 1 -name '*.xpi' -print -quit)
-            test -n "$signed_xpi"
-            cp "$signed_xpi" "release-assets/reddit-video-downloader-${{ steps.firefox.outputs.manifest_version }}.xpi"
-          fi
           node scripts/extract-release-notes.mjs --output release-notes.md
+          printf '\n<!-- firefox-release-awaiting-signature -->\n' >> release-notes.md
 
-      - name: Create GitHub Release
+      - name: Create pending GitHub Release
         run: |
           gh release create "${{ needs.release-metadata.outputs.tag_name }}" \
             release-assets/* \
+            --draft \
             --target "$GITHUB_SHA" \
             --title "${{ needs.release-metadata.outputs.tag_name }}" \
             --notes-file release-notes.md
         env:
           GH_TOKEN: ${{ github.token }}
 
-  deploy-update-pages:
-    needs: publish-firefox
-    if: needs.publish-firefox.result == 'success'
-    uses: ./.github/workflows/pages.yml
+      - name: Submit Firefox package
+        run: |
+          source_zip=$(find .output -maxdepth 1 -name '*-sources.zip' -print -quit)
+          test -n "$source_zip"
+          metadata_arguments=()
+          if [ "${{ steps.firefox.outputs.channel }}" = "listed" ]; then
+            metadata_arguments=(--amo-metadata amo-metadata.json)
+          fi
+          WEB_EXT_UPLOAD_SOURCE_CODE="$source_zip" node node_modules/web-ext/bin/web-ext.js sign \
+            --source-dir .output/firefox-mv3 \
+            --artifacts-dir signed-artifacts \
+            --approval-timeout 0 \
+            "${metadata_arguments[@]}" \
+            --no-input
+        env:
+          WEB_EXT_API_KEY: ${{ secrets.FIREFOX_JWT_ISSUER }}
+          WEB_EXT_API_SECRET: ${{ secrets.FIREFOX_JWT_SECRET }}
+          WEB_EXT_CHANNEL: ${{ steps.firefox.outputs.channel }}

@@ -22,10 +22,11 @@ export class BrowserDownloadGateway implements DownloadGateway {
       sourceUrl = request.source.url;
     }
     try {
+      const saveAs = request.saveAs && (await browser.runtime.getPlatformInfo()).os !== 'android';
       const downloadId = await browser.downloads.download({
         url: sourceUrl,
         filename: request.filename,
-        saveAs: request.saveAs,
+        saveAs,
         conflictAction: 'uniquify',
       });
       if (objectUrl) revokeAfterDownload(downloadId, objectUrl);

@@ -54,7 +54,7 @@ describe('ResolveAndDownload', () => {
     expect(start).toHaveBeenCalledWith({
       source: { kind: 'url', url: 'https://cdn.test/clip.mp4' },
       filename: 'provider_artist - Great clip.mp4',
-      saveAs: false,
+      saveAs: true,
     });
   });
 
