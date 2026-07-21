@@ -57,8 +57,11 @@ GitHub Pages publishes:
 - `https://toreckk.github.io/reddit-video-downloader/updates.json`
 - `https://toreckk.github.io/reddit-video-downloader/prerelease-updates.json`
 
-The manifests are generated from signed `.xpi` assets attached to non-draft GitHub Releases. The
-canonical asset name is `reddit-video-downloader-<numeric-version>.xpi`.
+The manifests combine signed `.xpi` assets attached to non-draft GitHub Releases with public listed
+versions returned by AMO. The canonical GitHub asset name is
+`reddit-video-downloader-<numeric-version>.xpi`.
 
-Before the first public `1.0.0` release, prepare the AMO listing and a final unlisted migration build
-without a self-hosted update URL so existing self-distributed installations move to AMO updates.
+The Pages workflow refreshes every six hours. Once AMO approves the first listed `1.0.0` version, its
+Mozilla-signed download is added to the stable feed automatically. This bridges existing
+self-distributed `0.x` installations onto the listed release; `1.0.0` itself has no custom update URL,
+so later updates are handled directly by AMO.

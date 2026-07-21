@@ -44,6 +44,29 @@ async function fetchReleases(repository, token) {
   }
 }
 
+async function fetchListedVersions(extensionId) {
+  const versions = [];
+  let next = `https://addons.mozilla.org/api/v5/addons/addon/${encodeURIComponent(extensionId)}/versions/?page_size=100`;
+
+  while (next) {
+    const response = await fetch(next, { headers: { Accept: 'application/json' } });
+
+    // Before 1.0.0 is listed, the add-on has no public AMO record.
+    if ([401, 403, 404].includes(response.status)) return [];
+    if (!response.ok) {
+      throw new Error(
+        `Unable to read public AMO versions: ${response.status} ${response.statusText}`,
+      );
+    }
+
+    const page = await response.json();
+    versions.push(...(page.results ?? []));
+    next = page.next;
+  }
+
+  return versions;
+}
+
 function collectUpdates(releases, prerelease) {
   const assetPattern = /^reddit-video-downloader-(\d+(?:\.\d+){1,3})\.xpi$/;
   const updates = [];
@@ -64,6 +87,25 @@ function collectUpdates(releases, prerelease) {
   return updates.sort(compareVersionsDescending);
 }
 
+function collectListedUpdates(versions) {
+  return versions
+    .filter((version) => version.channel === 'listed' && version.file?.url)
+    .map((version) => {
+      parseNumericVersion(version.version);
+      return { update_link: version.file.url, version: version.version };
+    });
+}
+
+function mergeUpdates(...updateGroups) {
+  const updatesByVersion = new Map();
+
+  for (const update of updateGroups.flat()) {
+    if (!updatesByVersion.has(update.version)) updatesByVersion.set(update.version, update);
+  }
+
+  return [...updatesByVersion.values()].sort(compareVersionsDescending);
+}
+
 function createManifest(extensionId, updates) {
   return { addons: { [extensionId]: { updates } } };
 }
@@ -71,12 +113,21 @@ function createManifest(extensionId, updates) {
 const configuration = await loadReleaseConfiguration();
 const outputDirectory = readOption('--output-dir') ?? 'pages-output';
 const releasesFile = readOption('--releases-file');
+const listedVersionsFile = readOption('--listed-versions-file');
 const repository = process.env.GITHUB_REPOSITORY ?? 'Toreckk/reddit-video-downloader';
 const token = process.env.GITHUB_TOKEN;
 const releases = releasesFile
   ? JSON.parse(await readFile(releasesFile, 'utf8'))
   : await fetchReleases(repository, token ?? '');
-const stableUpdates = collectUpdates(releases, false);
+const listedVersions = listedVersionsFile
+  ? JSON.parse(await readFile(listedVersionsFile, 'utf8')).results
+  : releasesFile
+    ? []
+    : await fetchListedVersions(configuration.firefox.extensionId);
+const stableUpdates = mergeUpdates(
+  collectUpdates(releases, false),
+  collectListedUpdates(listedVersions),
+);
 const prereleaseUpdates = collectUpdates(releases, true);
 
 await mkdir(outputDirectory, { recursive: true });
@@ -101,7 +152,7 @@ await Promise.all([
   </head>
   <body>
     <h1>Reddit Media Downloader</h1>
-    <p>Firefox update manifests for signed, self-distributed releases.</p>
+    <p>Firefox update manifests for signed self-distributed releases and the transition to AMO.</p>
     <ul>
       <li><a href="updates.json">Stable updates</a></li>
       <li><a href="prerelease-updates.json">Prerelease updates</a></li>

@@ -3,6 +3,8 @@ name: Firefox update pages
 on:
   workflow_call:
   workflow_dispatch:
+  schedule:
+    - cron: '17 */6 * * *'
   release:
     types:
       - published
