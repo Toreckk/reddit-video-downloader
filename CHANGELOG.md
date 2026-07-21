@@ -18,6 +18,8 @@
   release pull request is merged into `master`.
 - Build signed release candidates from the version branch while keeping their Firefox package
   version lower than the upcoming stable version.
+- Deploy update pages from the released `master` workflow instead of starting a redundant tag-based
+  Pages deployment that conflicts with environment branch protection.
 
 ### Other changes
 

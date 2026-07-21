@@ -32,7 +32,7 @@ Merging the release pull request starts `.github/workflows/release.yml`:
 
 1. Read and validate the merged package version and changelog.
 2. Skip publication if tag `vX.Y.Z` already exists.
-3. Wait for approval in the `firefox-publishing` GitHub environment.
+3. Read the Mozilla credentials from the `firefox-publishing` GitHub environment.
 4. Run the complete verification suite and create the Firefox and source archives.
 5. Submit the extension and source archive to Mozilla with the configured channel.
 6. For an unlisted version, wait for Mozilla signing and collect the signed XPI.
@@ -43,6 +43,12 @@ Merging the release pull request starts `.github/workflows/release.yml`:
 If signing or validation fails, no stable tag or GitHub Release is created. Fix the version branch,
 advance to a new version if Mozilla already accepted the failed version, and submit a new release PR.
 
+For unattended stable publication, keep the Mozilla secrets in `firefox-publishing` but do not set a
+required reviewer on that environment. The reviewed pull request is the human release gate. Restrict
+environment deployments to the `master` branch; optionally allow `release/v*` branches if signed
+release candidates will be used. Adding a required environment reviewer intentionally changes every
+publication back into a manual approval flow.
+
 ## Release candidates
 
 Open **Actions → Firefox prerelease → Run workflow** from the active version branch, then provide:
@@ -50,10 +56,10 @@ Open **Actions → Firefox prerelease → Run workflow** from the active version
 - `target_version`: the upcoming stable version, for example `1.0.0`.
 - `rc_number`: the human-facing candidate number, for example `1`.
 
-After approving the `firefox-publishing` environment, the workflow signs an unlisted candidate,
-creates a GitHub prerelease, and updates the prerelease feed. GitHub tags retain a SemVer label such as
-`v1.0.0-rc.1`; Firefox receives a compatible four-part numeric package version based on the version
-currently in `master`, keeping it lower than the upcoming stable version.
+This workflow is optional and is not part of an ordinary stable release. It signs an unlisted
+candidate, creates a GitHub prerelease, and updates the prerelease feed. GitHub tags retain a SemVer
+label such as `v1.0.0-rc.1`; Firefox receives a compatible four-part numeric package version based on
+the version currently in `master`, keeping it lower than the upcoming stable version.
 
 ## Required secrets
 

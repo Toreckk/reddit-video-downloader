@@ -35,4 +35,6 @@ review, merging it starts the protected `firefox-publishing` deployment.
 
 Once approved, GitHub Actions verifies the merge again, submits the extension and source archive to
 Mozilla, creates tag `vX.Y.Z` and the GitHub Release with the curated changelog, uploads the release
-assets, and refreshes the Firefox update feed. Do not create the stable tag manually.
+assets, and refreshes the Firefox update feed. The pull-request review is the normal human release
+gate; no post-merge approval is needed when the publishing environment has no required reviewer. Do
+not create the stable tag manually.
