@@ -2,6 +2,7 @@ import type { ProviderRegistry } from '@/src/core/application/providerRegistry';
 import type { DetectedMediaItem, DetectionMode } from '@/src/core/domain/media';
 import { AppError } from '@/src/core/domain/errors';
 import type { SiteSurfaceAdapter } from './types';
+import type { PostContext } from './types';
 
 export interface ScanResult {
   items: DetectedMediaItem[];
@@ -24,6 +25,16 @@ export function scanActivePage(
   }
 
   const contexts = matching.flatMap((adapter) => adapter.discover(root));
+  const items = detectMediaItems(contexts, registry, detectionMode);
+  const discoveredSurfaceIds = [...new Set(contexts.map((context) => context.surfaceId))];
+  return { items, surfaceId: discoveredSurfaceIds.join(',') || matching[0]?.id || 'reddit' };
+}
+
+export function detectMediaItems(
+  contexts: readonly PostContext[],
+  registry: ProviderRegistry,
+  detectionMode: DetectionMode,
+): DetectedMediaItem[] {
   const seen = new Set<string>();
   const items: DetectedMediaItem[] = [];
   for (const context of contexts) {
@@ -56,6 +67,5 @@ export function scanActivePage(
     if (left.isVisible !== right.isVisible) return left.isVisible ? -1 : 1;
     return left.documentOrder - right.documentOrder;
   });
-  const discoveredSurfaceIds = [...new Set(contexts.map((context) => context.surfaceId))];
-  return { items, surfaceId: discoveredSurfaceIds.join(',') || matching[0]?.id || 'reddit' };
+  return items;
 }

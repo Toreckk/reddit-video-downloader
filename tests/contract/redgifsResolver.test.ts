@@ -15,7 +15,13 @@ const reference: MediaReference = {
 };
 
 function response(status: number, body: unknown): HttpResponse {
-  return { ok: status >= 200 && status < 300, status, json: async () => body };
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    json: async () => body,
+    text: async () => JSON.stringify(body),
+    arrayBuffer: async () => new ArrayBuffer(0),
+  };
 }
 
 describe('RedgifsResolver contract', () => {

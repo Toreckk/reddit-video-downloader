@@ -136,7 +136,12 @@ export class PopupController {
     this.mediaList.update(item.itemId, { kind: 'resolving' });
     try {
       const provider = this.registry.get(item.reference.providerId);
-      const granted = await browser.permissions.request({ origins: provider.requiredOrigins });
+      const alreadyGranted = await browser.permissions.contains({
+        origins: provider.requiredOrigins,
+      });
+      const granted =
+        alreadyGranted ||
+        (await browser.permissions.request({ origins: provider.requiredOrigins }));
       if (!granted) {
         this.mediaList.update(item.itemId, {
           kind: 'error',

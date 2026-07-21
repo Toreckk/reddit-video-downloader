@@ -9,12 +9,14 @@ import {
 import { createProviderRegistry } from '@/src/providers/catalog';
 import { surfaces } from '@/src/surfaces/catalog';
 import { scanActivePage } from '@/src/surfaces/reddit/scanActivePage';
+import { InlineDownloadController } from '@/src/surfaces/reddit/inlineDownloadController';
 
 export default defineContentScript({
   matches: ['*://*.reddit.com/*'],
   runAt: 'document_idle',
   main() {
     const registry = createProviderRegistry();
+    new InlineDownloadController(registry, surfaces).start();
     const dismissedItemIds = new Set<string>();
     let dismissalPageUrl = window.location.href;
     // The returned promise keeps the WebExtension message channel open for the response.

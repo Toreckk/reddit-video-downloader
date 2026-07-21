@@ -2,9 +2,16 @@ import { readFileSync } from 'node:fs';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { CurrentRedditAdapter } from '@/src/surfaces/reddit/currentRedditAdapter';
 import { OldRedditAdapter } from '@/src/surfaces/reddit/oldRedditAdapter';
+import { InlineDownloadController } from '@/src/surfaces/reddit/inlineDownloadController';
+import { ProviderRegistry } from '@/src/core/application/providerRegistry';
+import { RedgifsProvider } from '@/src/providers/redgifs';
+import type { HttpClient } from '@/src/core/infrastructure/extensionHttpClient';
 
 const oldFixture = readFileSync('tests/fixtures/reddit-old/listing.html', 'utf8');
 const currentFixture = readFileSync('tests/fixtures/reddit-current/listing.html', 'utf8');
+const neverHttp: HttpClient = {
+  get: async () => Promise.reject(new Error('DOM discovery must not call the provider API')),
+};
 
 describe('Reddit surface adapters', () => {
   beforeEach(() => {
@@ -60,5 +67,24 @@ describe('Reddit surface adapters', () => {
         '<shreddit-post id="t3_new" content-href="https://redgifs.com/watch/NewClip"></shreddit-post>',
       );
     expect(adapter.discover(document)).toHaveLength(1);
+  });
+
+  it('adds inline actions only to supported old Reddit posts', () => {
+    document.body.innerHTML = oldFixture;
+    for (const post of document.querySelectorAll('.thing.link')) {
+      post.insertAdjacentHTML('beforeend', '<ul class="flat-list buttons"></ul>');
+    }
+    const controller = new InlineDownloadController(
+      new ProviderRegistry([new RedgifsProvider(neverHttp)]),
+      [new OldRedditAdapter()],
+    );
+
+    controller.start();
+    expect(document.querySelectorAll('.rmd-inline-download')).toHaveLength(2);
+    expect(
+      document.querySelector('.thing[data-fullname="t3_other"] .rmd-inline-download'),
+    ).toBeNull();
+    controller.stop();
+    expect(document.querySelector('.rmd-inline-download')).toBeNull();
   });
 });

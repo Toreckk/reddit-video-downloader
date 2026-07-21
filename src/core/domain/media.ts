@@ -10,9 +10,13 @@ export interface MediaReference {
 export type MediaContainer = 'mp4' | 'webm' | 'unknown';
 export type MediaQuality = 'hd' | 'sd' | 'original' | 'unknown';
 
+export type MediaAsset =
+  | { kind: 'direct'; url: string }
+  | { kind: 'separate-mp4-tracks'; videoUrl: string; audioUrl: string };
+
 export interface MediaVariant {
   id: string;
-  url: string;
+  asset: MediaAsset;
   container: MediaContainer;
   quality?: MediaQuality;
   width?: number;

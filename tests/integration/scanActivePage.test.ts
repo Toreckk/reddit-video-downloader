@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { ProviderRegistry } from '@/src/core/application/providerRegistry';
 import type { MediaProvider } from '@/src/core/domain/media';
 import { RedgifsProvider } from '@/src/providers/redgifs';
+import { VRedditProvider } from '@/src/providers/vreddit';
 import type { HttpClient } from '@/src/core/infrastructure/extensionHttpClient';
 import { CurrentRedditAdapter } from '@/src/surfaces/reddit/currentRedditAdapter';
 import { scanActivePage } from '@/src/surfaces/reddit/scanActivePage';
@@ -42,5 +43,26 @@ describe('scanActivePage', () => {
       't3_duplicate',
       't3_closed',
     ]);
+  });
+
+  it('treats a visible native Reddit player as an opened v.redd.it video', () => {
+    document.body.innerHTML = `
+      <shreddit-post id="t3_native" author="reddit-user" content-href="https://v.redd.it/xko5vazktfeh1">
+        <shreddit-player></shreddit-player>
+      </shreddit-post>`;
+    const provider: MediaProvider = new VRedditProvider(neverHttp);
+    const result = scanActivePage(
+      document,
+      window.location,
+      new ProviderRegistry([provider]),
+      [new CurrentRedditAdapter()],
+      'opened',
+    );
+
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]?.reference).toMatchObject({
+      providerId: 'vreddit',
+      canonicalId: 'xko5vazktfeh1',
+    });
   });
 });

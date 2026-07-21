@@ -1,5 +1,6 @@
 export interface PostContext {
   surfaceId: string;
+  postElement: HTMLElement;
   postId: string;
   outboundUrls: URL[];
   activatedOutboundUrls: URL[];

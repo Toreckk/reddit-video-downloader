@@ -15,7 +15,7 @@ export const DEFAULT_SETTINGS: ExtensionSettings = {
   preferredQuality: 'hd',
   saveAs: false,
   filenameTemplate: '{sourceCreator|creator} - {title}',
-  enabledProviders: ['redgifs'],
+  enabledProviders: ['redgifs', 'vreddit'],
   detectionMode: 'opened',
 };
 

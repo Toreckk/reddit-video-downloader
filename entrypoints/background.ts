@@ -4,14 +4,18 @@ import { isMediaReference, isPostMetadata } from '@/src/core/domain/media';
 import { normalizeError, AppError } from '@/src/core/domain/errors';
 import type { ResolveAndDownloadResponse } from '@/src/core/domain/messages';
 import { BrowserDownloadGateway } from '@/src/core/infrastructure/browserDownloadGateway';
+import { ExtensionHttpClient } from '@/src/core/infrastructure/extensionHttpClient';
+import { BrowserMediaAssetPreparer } from '@/src/core/infrastructure/mediaAssetPreparer';
 import { SettingsRepository } from '@/src/core/infrastructure/settingsRepository';
 import { createProviderRegistry } from '@/src/providers/catalog';
 
 export default defineBackground(() => {
   const settings = new SettingsRepository();
+  const http = new ExtensionHttpClient();
   const coordinator = new ResolveAndDownload(
-    createProviderRegistry(),
+    createProviderRegistry(http),
     settings,
+    new BrowserMediaAssetPreparer(http),
     new BrowserDownloadGateway(),
   );
 

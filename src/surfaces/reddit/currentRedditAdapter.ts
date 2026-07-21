@@ -1,6 +1,7 @@
 import {
   attributeFrom,
   collectActivatedEmbedUrls,
+  collectActivatedNativeMediaUrls,
   collectUrls,
   elementIsVisible,
   isRedditLocation,
@@ -29,15 +30,20 @@ export class CurrentRedditAdapter implements SiteSurfaceAdapter {
       const postId =
         attributeFrom(post, ['id', 'thing-id', 'data-post-id', 'data-fullname']) ??
         `current-reddit-post-${documentOrder}`;
+      const outboundUrls = collectUrls(
+        post,
+        ['content-href', 'outbound-url', 'data-url', 'url'],
+        location.href,
+      );
       const context: PostContext = {
         surfaceId: this.id,
+        postElement: post,
         postId,
-        outboundUrls: collectUrls(
-          post,
-          ['content-href', 'outbound-url', 'data-url', 'url'],
-          location.href,
-        ),
-        activatedOutboundUrls: collectActivatedEmbedUrls(post, location.href),
+        outboundUrls,
+        activatedOutboundUrls: [
+          ...collectActivatedEmbedUrls(post, location.href),
+          ...collectActivatedNativeMediaUrls(post, outboundUrls),
+        ],
         documentOrder,
         isVisible: elementIsVisible(post),
       };

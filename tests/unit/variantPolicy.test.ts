@@ -14,7 +14,7 @@ function media(overrides: Partial<ResolvedMedia> = {}): ResolvedMedia {
     variants: [
       {
         id: 'hd',
-        url: 'https://cdn/hd.mp4',
+        asset: { kind: 'direct', url: 'https://cdn/hd.mp4' },
         container: 'mp4',
         quality: 'hd',
         hasAudio: true,
@@ -22,7 +22,7 @@ function media(overrides: Partial<ResolvedMedia> = {}): ResolvedMedia {
       },
       {
         id: 'sd',
-        url: 'https://cdn/sd.mp4',
+        asset: { kind: 'direct', url: 'https://cdn/sd.mp4' },
         container: 'mp4',
         quality: 'sd',
         hasAudio: true,
@@ -30,7 +30,7 @@ function media(overrides: Partial<ResolvedMedia> = {}): ResolvedMedia {
       },
       {
         id: 'silent',
-        url: 'https://cdn/silent.mp4',
+        asset: { kind: 'direct', url: 'https://cdn/silent.mp4' },
         container: 'mp4',
         quality: 'hd',
         hasAudio: false,
@@ -62,7 +62,7 @@ describe('selectVariant', () => {
       variants: [
         {
           id: 'hd',
-          url: 'https://cdn/hd.mp4',
+          asset: { kind: 'direct', url: 'https://cdn/hd.mp4' },
           container: 'mp4',
           quality: 'hd',
           hasAudio: false,
@@ -78,7 +78,7 @@ describe('selectVariant', () => {
       variants: [
         {
           id: 'silent',
-          url: 'https://cdn/silent.mp4',
+          asset: { kind: 'direct', url: 'https://cdn/silent.mp4' },
           container: 'mp4',
           quality: 'hd',
           hasAudio: false,

@@ -12,14 +12,17 @@ A temporary add-on remains installed until Firefox restarts. After rebuilding, r
 
 ## First acceptance pass
 
-1. Open an old Reddit or current Reddit page containing a direct Redgifs post link.
+1. Open an old Reddit or current Reddit page containing direct Redgifs and `v.redd.it` post links. Confirm each supported post receives a **download** action beside Reddit's other post actions.
 2. Leave the Redgifs/RES preview closed and open the extension popup. Confirm the default mode does not list that post.
 3. Expand the embed in Reddit, then click **Refresh**. Confirm the popup now lists its title, Reddit creator, subreddit, and provider.
-4. Click **Download**. Firefox should ask for narrow Redgifs access the first time; approve it.
+4. Click the inline **download** action on a Redgifs post. Confirm it works even when the embed is closed. Repeat from the popup's **Download** button.
 5. Confirm the popup says **Download started** and the resulting filename uses the Redgifs uploader followed by the Reddit title. If the provider has no uploader, it should fall back to the Reddit creator.
 6. Play the file and verify it contains audio when the Redgifs source has audio.
-7. Use the popup search field, then click **Clear shown**. Confirm only the filtered rows are cleared, reopening the popup keeps them cleared, and reloading Reddit restores them.
-8. Open the options page from the popup gear. Test **All supported links loaded on the page**, **Prefer SD**, **Always ask where to save**, and the fallback template `{sourceCreator|creator} - {title}`.
+7. Click **download** on a `v.redd.it` post. While it prepares, confirm the action shows **preparing…**. Play the resulting MP4 and verify that it contains both video and audio when the source has audio.
+8. Leave another native Reddit video collapsed and confirm it is absent from the opened-only popup. Expand its native player, click **Refresh**, and confirm it appears without relying on a new network request.
+9. Scroll until Reddit dynamically loads more posts and confirm supported posts receive inline actions without reloading the extension.
+10. Use the popup search field, then click **Clear shown**. Confirm only the filtered rows are cleared, reopening the popup keeps them cleared, and reloading Reddit restores them.
+11. Open the options page from the popup gear. Test **All supported links loaded on the page**, **Prefer SD**, **Always ask where to save**, and the fallback template `{sourceCreator|creator} - {title}`.
 
 ## Inspecting download errors
 
@@ -34,9 +37,9 @@ The popup shows an error code and, when Firefox supplies one, its underlying dow
 ## Useful failure cases
 
 - Open the popup on a non-Reddit page: it should explain that a Reddit tab is needed.
-- Deny the Redgifs permission: the row should remain retryable.
 - Go offline before clicking Download: the row should show a recoverable provider/network error.
 - Test a removed Redgifs URL: the row should explain that the media is unavailable.
+- Test a removed `v.redd.it` URL: it should report that the Reddit video is unavailable.
 - Test with RES disabled, with an expando closed, and with an expando open.
 
 For temporary extensions, private-window access is controlled from `about:addons` after installation. Enable **Run in Private Windows** before testing there.

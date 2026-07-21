@@ -62,6 +62,20 @@ export function collectActivatedEmbedUrls(element: Element, locationHref: string
   return urls;
 }
 
+export function collectActivatedNativeMediaUrls(
+  element: Element,
+  outboundUrls: readonly URL[],
+): URL[] {
+  const players = element.querySelectorAll(
+    'video, shreddit-player, .reddit-video-player, [data-testid="video-player"]',
+  );
+  const hasExpandedPlayer = Array.from(players).some(
+    (player) => !elementOrAncestorIsCollapsed(player, element),
+  );
+  if (!hasExpandedPlayer) return [];
+  return outboundUrls.filter((url) => url.hostname.toLowerCase() === 'v.redd.it');
+}
+
 function elementOrAncestorIsCollapsed(element: Element, boundary: Element): boolean {
   let current: Element | null = element;
   while (current) {

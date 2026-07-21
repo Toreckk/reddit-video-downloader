@@ -4,6 +4,8 @@ export interface HttpResponse {
   readonly ok: boolean;
   readonly status: number;
   json(): Promise<unknown>;
+  text(): Promise<string>;
+  arrayBuffer(): Promise<ArrayBuffer>;
 }
 
 export interface HttpClient {

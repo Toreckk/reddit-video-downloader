@@ -27,7 +27,7 @@ describe('ResolveAndDownload', () => {
         variants: [
           {
             id: 'hd',
-            url: 'https://cdn.test/clip.mp4',
+            asset: { kind: 'direct', url: 'https://cdn.test/clip.mp4' },
             container: 'mp4',
             quality: 'hd',
             hasAudio: true,
@@ -40,15 +40,19 @@ describe('ResolveAndDownload', () => {
     const settings: SettingsReader = { get: async () => ({ ...DEFAULT_SETTINGS }) };
     const start = vi.fn(async () => 42);
     const downloads: DownloadGateway = { start };
+    const assets = {
+      prepare: vi.fn(async () => ({ kind: 'url' as const, url: 'https://cdn.test/clip.mp4' })),
+    };
     const result = await new ResolveAndDownload(
       new ProviderRegistry([provider]),
       settings,
+      assets,
       downloads,
     ).execute({ reference, post: { postId: 't3_1', creator: 'alice', title: 'Great clip' } });
 
     expect(result).toEqual({ downloadId: 42, filename: 'provider_artist - Great clip.mp4' });
     expect(start).toHaveBeenCalledWith({
-      url: 'https://cdn.test/clip.mp4',
+      source: { kind: 'url', url: 'https://cdn.test/clip.mp4' },
       filename: 'provider_artist - Great clip.mp4',
       saveAs: false,
     });
@@ -66,7 +70,7 @@ describe('ResolveAndDownload', () => {
         variants: [
           {
             id: 'hd',
-            url: 'https://cdn.test/clip.mp4',
+            asset: { kind: 'direct', url: 'https://cdn.test/clip.mp4' },
             container: 'mp4',
             quality: 'hd',
             hasAudio: true,
@@ -79,7 +83,12 @@ describe('ResolveAndDownload', () => {
     const settings: SettingsReader = { get: async () => ({ ...DEFAULT_SETTINGS }) };
     const start = vi.fn(async () => 43);
 
-    await new ResolveAndDownload(new ProviderRegistry([provider]), settings, { start }).execute({
+    const assets = {
+      prepare: async () => ({ kind: 'url' as const, url: 'https://cdn.test/clip.mp4' }),
+    };
+    await new ResolveAndDownload(new ProviderRegistry([provider]), settings, assets, {
+      start,
+    }).execute({
       reference,
       post: { postId: 't3_2', creator: 'Trevv001', title: 'Sample' },
     });

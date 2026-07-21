@@ -7,7 +7,11 @@ export default defineConfig({
     description: '__MSG_extensionDescription__',
     default_locale: 'en',
     permissions: ['downloads', 'storage'],
-    optional_host_permissions: ['https://api.redgifs.com/*', 'https://*.redgifs.com/*'],
+    host_permissions: [
+      'https://api.redgifs.com/*',
+      'https://*.redgifs.com/*',
+      'https://v.redd.it/*',
+    ],
     action: {
       default_title: '__MSG_actionTitle__',
       default_icon: {

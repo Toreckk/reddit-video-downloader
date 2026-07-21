@@ -1,4 +1,5 @@
 import type { DownloadGateway } from '@/src/core/infrastructure/browserDownloadGateway';
+import type { MediaAssetPreparer } from '@/src/core/infrastructure/mediaAssetPreparer';
 import type { SettingsReader } from '@/src/core/infrastructure/settingsRepository';
 import type { MediaReference, PostMetadata } from '@/src/core/domain/media';
 import { createDownloadFilename, type FilenameContext } from './filenamePolicy';
@@ -20,6 +21,7 @@ export class ResolveAndDownload {
   constructor(
     private readonly registry: ProviderRegistry,
     private readonly settings: SettingsReader,
+    private readonly assets: MediaAssetPreparer,
     private readonly downloads: DownloadGateway,
   ) {}
 
@@ -28,6 +30,7 @@ export class ResolveAndDownload {
     const settings = await this.settings.get();
     const resolved = await provider.resolve(command.reference, {});
     const selection = selectVariant(resolved, settings.preferredQuality);
+    const source = await this.assets.prepare(selection.variant.asset);
     const filenameContext: FilenameContext = {
       reference: command.reference,
       post: command.post,
@@ -36,7 +39,7 @@ export class ResolveAndDownload {
     if (resolved.creator !== undefined) filenameContext.sourceCreator = resolved.creator;
     const filename = createDownloadFilename(filenameContext);
     const downloadId = await this.downloads.start({
-      url: selection.variant.url,
+      source,
       filename,
       saveAs: settings.saveAs,
     });

@@ -39,7 +39,7 @@ async function save(event: SubmitEvent): Promise<void> {
     preferredQuality: quality.value as PreferredQuality,
     saveAs: saveAs.checked,
     filenameTemplate: template,
-    enabledProviders: ['redgifs'],
+    enabledProviders: ['redgifs', 'vreddit'],
     detectionMode: detectionMode.value === 'all' ? 'all' : 'opened',
   });
   status.textContent = 'Saved.';

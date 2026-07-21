@@ -75,7 +75,7 @@ function createVariant(
 ): MediaVariant {
   const variant: MediaVariant = {
     id,
-    url,
+    asset: { kind: 'direct', url },
     container: 'mp4',
     quality: id === 'silent' ? 'unknown' : id,
     hasAudio: silent ? false : gif.hasAudio,

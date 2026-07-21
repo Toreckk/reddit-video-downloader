@@ -13,6 +13,8 @@ describe('RedgifsTokenManager', () => {
       ok: true,
       status: 200,
       json: async () => ({ token: jwt(now / 1000 + 300) }),
+      text: async () => '',
+      arrayBuffer: async () => new ArrayBuffer(0),
     };
     const get = vi.fn(async () => response);
     const manager = new RedgifsTokenManager({ get }, () => now);
@@ -31,6 +33,8 @@ describe('RedgifsTokenManager', () => {
         ok: true,
         status: 200,
         json: async () => ({ token: `opaque-${++counter}` }),
+        text: async () => '',
+        arrayBuffer: async () => new ArrayBuffer(0),
       }),
     });
     expect(await manager.getToken()).toBe('opaque-1');
