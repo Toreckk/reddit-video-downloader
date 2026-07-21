@@ -16,6 +16,8 @@
 - Stage each version on a `release/vX.Y.Z` branch with its package version and curated changelog.
 - Create the GitHub Release and submit the same version to Mozilla automatically after the reviewed
   release pull request is merged into `master`.
+- Build signed release candidates from the version branch while keeping their Firefox package
+  version lower than the upcoming stable version.
 
 ### Other changes
 

@@ -52,7 +52,8 @@ Open **Actions → Firefox prerelease → Run workflow** from the active version
 
 After approving the `firefox-publishing` environment, the workflow signs an unlisted candidate,
 creates a GitHub prerelease, and updates the prerelease feed. GitHub tags retain a SemVer label such as
-`v1.0.0-rc.1`; Firefox receives a compatible four-part numeric package version.
+`v1.0.0-rc.1`; Firefox receives a compatible four-part numeric package version based on the version
+currently in `master`, keeping it lower than the upcoming stable version.
 
 ## Required secrets
 
