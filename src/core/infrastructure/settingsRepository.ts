@@ -13,7 +13,7 @@ export interface ExtensionSettings {
 
 export const DEFAULT_SETTINGS: ExtensionSettings = {
   preferredQuality: 'hd',
-  saveAs: false,
+  saveAs: true,
   filenameTemplate: '{sourceCreator|creator} - {title}',
   enabledProviders: ['redgifs', 'vreddit'],
   detectionMode: 'opened',
@@ -41,7 +41,7 @@ export function parseSettings(value: unknown): ExtensionSettings {
   const candidate = value as Record<string, unknown>;
   return {
     preferredQuality: candidate.preferredQuality === 'sd' ? 'sd' : 'hd',
-    saveAs: candidate.saveAs === true,
+    saveAs: candidate.saveAs !== false,
     filenameTemplate: parseFilenameTemplate(candidate.filenameTemplate),
     enabledProviders: Array.isArray(candidate.enabledProviders)
       ? candidate.enabledProviders.filter((item): item is string => typeof item === 'string')

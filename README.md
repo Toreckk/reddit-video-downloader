@@ -12,7 +12,8 @@ A privacy-focused Firefox extension that finds supported videos in Reddit and do
 - Resolves only the selected video, prefers HD with audio, falls back to SD, and never chooses Redgifs' explicit silent variant.
 - Reads `v.redd.it` DASH manifests, downloads the selected video and best audio tracks, and combines them locally into one MP4 without re-encoding.
 - Creates safe `{sourceCreator|creator} - {title}.mp4` filenames using the source uploader's display name when available, falling back to its account handle and then the Reddit user, and lets Firefox uniquify duplicates.
-- Includes quality, save-dialog, and filename-template options.
+- Includes quality, save-dialog, and filename-template options; the save dialog is enabled by
+  default.
 - Uses no analytics, accounts, browsing-history storage, external backend, or request interception.
 - Uses Firefox's installation permission prompt so Reddit buttons and provider downloads work
   immediately after access is approved.
@@ -36,10 +37,10 @@ manual acceptance pass. See [CONTRIBUTING.md](CONTRIBUTING.md) for the version-b
 ## Releases
 
 Each stable version is staged on `release/vX.Y.Z`, including its implementation, package version, and
-curated changelog. A reviewed merge into protected `master` automatically creates the tag and GitHub
-Release and submits the same version to Mozilla. Stable versions below `1.0.0` and all release
-candidates are Mozilla-signed but unlisted; stable versions from `1.0.0` onward are submitted to the
-public Firefox Add-ons listing.
+curated changelog. A reviewed merge into protected `master` automatically submits the same version
+to Mozilla and creates a pending draft. A resumable finalizer publishes the tag and GitHub Release
+after Mozilla signing. Stable versions below `1.0.0` and all release candidates are Mozilla-signed
+but unlisted; stable versions from `1.0.0` onward are submitted to the public Firefox Add-ons listing.
 
 Signed self-distributed releases update through GitHub Pages. See
 [docs/releasing.md](docs/releasing.md) for the channel policy, release-candidate workflow, signing

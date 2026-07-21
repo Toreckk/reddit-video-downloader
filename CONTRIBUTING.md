@@ -33,8 +33,9 @@ authors to approve their own pull requests. Later topic merges update the same r
 CI verifies the source branch, version increase, lockfile, changelog, and package. After the required
 review, merging it starts the protected `firefox-publishing` deployment.
 
-Once approved, GitHub Actions verifies the merge again, submits the extension and source archive to
-Mozilla, creates tag `vX.Y.Z` and the GitHub Release with the curated changelog, uploads the release
-assets, and refreshes the Firefox update feed. The pull-request review is the normal human release
-gate; no post-merge approval is needed when the publishing environment has no required reviewer. Do
-not create the stable tag manually.
+Once approved, GitHub Actions verifies the merge again, creates a pending draft, and submits the
+extension and source archive to Mozilla. A resumable finalizer checks Mozilla every 15 minutes and,
+once signing finishes, attaches the signed XPI, publishes tag `vX.Y.Z` and the GitHub Release, and
+refreshes the Firefox update feed. The pull-request review is the normal human release gate; no
+post-merge approval is needed when the publishing environment has no required reviewer. Do not create
+the stable tag manually.

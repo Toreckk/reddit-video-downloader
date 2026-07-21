@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.2.2 (2026-07-21)
+
+### Notable changes
+
+#### Resumable Firefox releases
+
+- Submit each stable version to Mozilla once without holding a GitHub runner open during review.
+- Keep the GitHub Release as a durable draft while Mozilla signing is pending.
+- Check Mozilla immediately and every 15 minutes, then attach the signed XPI, publish the GitHub
+  Release, and refresh the update feed automatically.
+- Allow the finalizer to be safely run again from GitHub Actions without resubmitting the extension.
+
+#### Safer download location defaults
+
+- Ask where to save every video by default for new and previously unconfigured installations.
+- Keep an explicit opt-out in Options; when disabled, downloads use Firefox's configured Downloads
+  folder and Firefox's own download behavior.
+
 ## 0.2.1 (2026-07-21)
 
 ### Notable changes

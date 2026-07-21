@@ -38,7 +38,10 @@ development host grants, so permission behavior must always be accepted once wit
 9. Scroll until Reddit dynamically loads more posts and confirm supported posts receive inline actions without reloading the extension.
 10. Open an old Reddit search page containing Redgifs or `v.redd.it` results. Confirm each supported search card receives a **download** action in its metadata row and downloads with the result's title and Reddit author.
 11. Use the popup search field, then click **Clear shown**. Confirm only the filtered rows are cleared, reopening the popup keeps them cleared, and reloading Reddit restores them.
-12. Open the options page from the popup gear. Test **All supported links loaded on the page**, **Prefer SD**, **Always ask where to save**, and the fallback template `{sourceCreator|creator} - {title}`.
+12. Open the options page from the popup gear. Confirm **Always ask where to save** is enabled on a
+    clean profile, then test both its enabled and disabled behavior. Also test **All supported links
+    loaded on the page**, **Prefer SD**, and the fallback template
+    `{sourceCreator|creator} - {title}`.
 
 ## Inspecting download errors
 
