@@ -4,11 +4,10 @@ on:
   push:
     branches:
       - master
+  workflow_dispatch:
 
 permissions:
   contents: write
-  issues: write
-  pull-requests: write
   pages: write
   id-token: write
 
@@ -17,47 +16,33 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  release-please:
+  release-metadata:
     runs-on: ubuntu-latest
     outputs:
-      release_created: ${{ steps.release.outputs.release_created }}
-      sha: ${{ steps.release.outputs.sha }}
+      should_release: ${{ steps.release.outputs.should_release }}
       tag_name: ${{ steps.release.outputs.tag_name }}
       version: ${{ steps.release.outputs.version }}
 
     steps:
-      - name: Check out release metadata
+      - name: Check out merged source and tags
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - name: Check initial release bootstrap
-        id: bootstrap
-        run: |
-          if git rev-parse --quiet --verify refs/tags/v0.2.0 >/dev/null; then
-            echo "ready=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "Release Please will start after the initial v0.2.0 release is tagged."
-          fi
-
-      - name: Create or update release pull request
+      - name: Resolve merged release
         id: release
-        if: steps.bootstrap.outputs.ready == 'true'
-        uses: googleapis/release-please-action@v5
+        run: node scripts/resolve-merged-release.mjs --github-output "$GITHUB_OUTPUT"
 
   publish-firefox:
-    needs: release-please
-    if: needs.release-please.outputs.release_created == 'true'
+    needs: release-metadata
+    if: needs.release-metadata.outputs.should_release == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     environment: firefox-publishing
 
     steps:
-      - name: Check out released source
+      - name: Check out merged source
         uses: actions/checkout@v6
-        with:
-          ref: ${{ needs.release-please.outputs.sha }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v7
@@ -70,11 +55,11 @@ jobs:
 
       - name: Resolve Firefox release policy
         id: firefox
-        run: node scripts/resolve-firefox-release.mjs --version "${{ needs.release-please.outputs.version }}" --github-output "$GITHUB_OUTPUT"
+        run: node scripts/resolve-firefox-release.mjs --version "${{ needs.release-metadata.outputs.version }}" --github-output "$GITHUB_OUTPUT"
 
       - name: Show publication decision
         run: |
-          echo "GitHub tag: ${{ needs.release-please.outputs.tag_name }}"
+          echo "GitHub tag: ${{ needs.release-metadata.outputs.tag_name }}"
           echo "Firefox version: ${{ steps.firefox.outputs.manifest_version }}"
           echo "Firefox channel: ${{ steps.firefox.outputs.channel }}"
 
@@ -111,25 +96,25 @@ jobs:
           WEB_EXT_API_SECRET: ${{ secrets.FIREFOX_JWT_SECRET }}
           WEB_EXT_CHANNEL: ${{ steps.firefox.outputs.channel }}
 
-      - name: Upload unsigned release archives
+      - name: Prepare release assets and notes
         run: |
-          gh release upload "${{ needs.release-please.outputs.tag_name }}" \
-            .output/*-firefox.zip \
-            .output/*-sources.zip \
-            --clobber
-        env:
-          GH_TOKEN: ${{ github.token }}
+          mkdir -p release-assets
+          cp .output/*-firefox.zip release-assets/
+          cp .output/*-sources.zip release-assets/
+          if [ "${{ steps.firefox.outputs.channel }}" = "unlisted" ]; then
+            signed_xpi=$(find signed-artifacts -maxdepth 1 -name '*.xpi' -print -quit)
+            test -n "$signed_xpi"
+            cp "$signed_xpi" "release-assets/reddit-video-downloader-${{ steps.firefox.outputs.manifest_version }}.xpi"
+          fi
+          node scripts/extract-release-notes.mjs --output release-notes.md
 
-      - name: Upload signed self-distributed package
-        if: steps.firefox.outputs.channel == 'unlisted'
+      - name: Create GitHub Release
         run: |
-          signed_xpi=$(find signed-artifacts -maxdepth 1 -name '*.xpi' -print -quit)
-          test -n "$signed_xpi"
-          canonical_xpi="signed-artifacts/reddit-video-downloader-${{ steps.firefox.outputs.manifest_version }}.xpi"
-          mv "$signed_xpi" "$canonical_xpi"
-          gh release upload "${{ needs.release-please.outputs.tag_name }}" \
-            "$canonical_xpi" \
-            --clobber
+          gh release create "${{ needs.release-metadata.outputs.tag_name }}" \
+            release-assets/* \
+            --target "$GITHUB_SHA" \
+            --title "${{ needs.release-metadata.outputs.tag_name }}" \
+            --notes-file release-notes.md
         env:
           GH_TOKEN: ${{ github.token }}
 

@@ -1,0 +1,66 @@
+name: Release proposal
+
+on:
+  push:
+    branches:
+      - 'release/v*'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: release-proposal-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  open-or-update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check out version branch and tags
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Validate release proposal metadata
+        run: node scripts/check-release-pr.mjs --base-ref origin/master --head-ref "$GITHUB_REF_NAME"
+
+      - name: Prepare pull request notes
+        run: |
+          node scripts/extract-release-notes.mjs --output release-notes.md
+          {
+            echo "## Release proposal"
+            echo
+            echo "This pull request promotes \`$GITHUB_REF_NAME\` to the released \`master\` branch."
+            echo
+            cat release-notes.md
+            echo
+            echo "## Final checks"
+            echo
+            echo "- [ ] CI passes"
+            echo "- [ ] Signed-extension behavior has been manually tested where relevant"
+            echo "- [ ] Mozilla channel and release assets are correct"
+          } > release-pr.md
+
+      - name: Open release pull request when absent
+        run: |
+          existing_url=$(gh pr list \
+            --base master \
+            --head "$GITHUB_REF_NAME" \
+            --state open \
+            --json url \
+            --jq '.[0].url')
+          if [ -n "$existing_url" ]; then
+            gh pr edit "$existing_url" --body-file release-pr.md
+            echo "Updated release pull request: $existing_url"
+            exit 0
+          fi
+          gh pr create \
+            --base master \
+            --head "$GITHUB_REF_NAME" \
+            --title "release: v${GITHUB_REF_NAME#release/v}" \
+            --body-file release-pr.md
+        env:
+          GH_TOKEN: ${{ github.token }}
