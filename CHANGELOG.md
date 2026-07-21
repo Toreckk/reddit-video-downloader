@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.3 (2026-07-21)
+
+### Notable changes
+
+#### Efficient Firefox finalization
+
+- Start the finalizer automatically after a stable Mozilla submission and poll for up to 30 minutes.
+- Remove the permanent 15-minute schedule so no GitHub runners start between releases.
+- Fail with an actionable message when review takes longer, allowing **Re-run failed jobs** after
+  Mozilla approval without resubmitting the extension.
+
 ## 0.2.2 (2026-07-21)
 
 ### Notable changes

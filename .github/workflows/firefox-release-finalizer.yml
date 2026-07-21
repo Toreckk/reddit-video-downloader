@@ -6,8 +6,6 @@ on:
       - Release
     types:
       - completed
-  schedule:
-    - cron: '*/15 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -22,7 +20,7 @@ concurrency:
 jobs:
   finalize:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 35
     environment: firefox-publishing
     outputs:
       released_any: ${{ steps.finalize.outputs.released_any }}
@@ -42,38 +40,63 @@ jobs:
         id: finalize
         run: |
           released_any=false
-          draft_tags=$(gh api --paginate "repos/${GITHUB_REPOSITORY}/releases?per_page=100" \
-            --jq '.[] | select(.draft == true and ((.body // "") | contains("<!-- firefox-release-awaiting-signature -->"))) | .tag_name')
+          check=1
+          max_checks=31
 
-          while IFS= read -r tag; do
-            if [ -z "$tag" ]; then
-              continue
-            fi
-            if [[ ! "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-              echo "Skipping unexpected pending release tag: $tag"
-              continue
+          while true; do
+            pending_count=0
+            draft_tags=$(gh api --paginate "repos/${GITHUB_REPOSITORY}/releases?per_page=100" \
+              --jq '.[] | select(.draft == true and ((.body // "") | contains("<!-- firefox-release-awaiting-signature -->"))) | .tag_name')
+
+            if [ -z "$draft_tags" ]; then
+              echo "No pending Firefox releases were found."
+              break
             fi
 
-            version="${tag#v}"
-            output="signed-artifacts/reddit-video-downloader-${version}.xpi"
-            state_file=$(mktemp)
-            node scripts/finalize-firefox-release.mjs \
-              --version "$version" \
-              --output "$output" \
-              --github-output "$state_file"
-            ready=$(sed -n 's/^ready=//p' "$state_file")
-            channel=$(sed -n 's/^channel=//p' "$state_file")
+            while IFS= read -r tag; do
+              if [ -z "$tag" ]; then
+                continue
+              fi
+              if [[ ! "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+                echo "Skipping unexpected pending release tag: $tag"
+                continue
+              fi
 
-            if [ "$ready" != "true" ]; then
-              continue
+              version="${tag#v}"
+              output="signed-artifacts/reddit-video-downloader-${version}.xpi"
+              state_file=$(mktemp)
+              node scripts/finalize-firefox-release.mjs \
+                --version "$version" \
+                --output "$output" \
+                --github-output "$state_file"
+              ready=$(sed -n 's/^ready=//p' "$state_file")
+              channel=$(sed -n 's/^channel=//p' "$state_file")
+
+              if [ "$ready" != "true" ]; then
+                pending_count=$((pending_count + 1))
+                continue
+              fi
+              if [ "$channel" = "unlisted" ]; then
+                gh release upload "$tag" "$output" --clobber
+              fi
+              gh release edit "$tag" --draft=false
+              released_any=true
+              echo "Published GitHub Release $tag."
+            done <<< "$draft_tags"
+
+            if [ "$pending_count" -eq 0 ]; then
+              break
             fi
-            if [ "$channel" = "unlisted" ]; then
-              gh release upload "$tag" "$output" --clobber
+            if [ "$check" -ge "$max_checks" ]; then
+              echo "released_any=$released_any" >> "$GITHUB_OUTPUT"
+              echo "::error::Mozilla approval is still pending after 30 minutes. Re-run the failed finalizer job after Mozilla approves the version."
+              exit 1
             fi
-            gh release edit "$tag" --draft=false
-            released_any=true
-            echo "Published GitHub Release $tag."
-          done <<< "$draft_tags"
+
+            echo "$pending_count release(s) still pending; checking again in 60 seconds ($check/$max_checks)."
+            check=$((check + 1))
+            sleep 60
+          done
 
           echo "released_any=$released_any" >> "$GITHUB_OUTPUT"
         env:
@@ -83,5 +106,5 @@ jobs:
 
   deploy-update-pages:
     needs: finalize
-    if: needs.finalize.outputs.released_any == 'true'
+    if: always() && needs.finalize.outputs.released_any == 'true'
     uses: ./.github/workflows/pages.yml
