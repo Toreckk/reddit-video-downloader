@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Enable Reddit Media Downloader</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main>
+      <img src="/icon.svg" width="72" height="72" alt="" />
+      <p class="eyebrow">One-time setup</p>
+      <h1>Enable downloads on Reddit</h1>
+      <p>
+        Firefox requires you to approve site access before the extension can add Download buttons or
+        contact supported media providers.
+      </p>
+      <ul>
+        <li>Reddit access adds the inline buttons and scans posts.</li>
+        <li>Redgifs and <code>v.redd.it</code> access is used only after you choose Download.</li>
+      </ul>
+      <button id="enable-access" type="button">Enable Reddit downloads</button>
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+      <p class="privacy">No analytics, accounts, tracking, or browsing-history storage.</p>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

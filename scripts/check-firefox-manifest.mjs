@@ -17,6 +17,20 @@ if (!manifest.action?.default_popup) failures.push('action.default_popup is miss
 if (manifest.permissions?.includes('tabs')) failures.push('unnecessary tabs permission is present');
 if (manifest.host_permissions?.includes('<all_urls>'))
   failures.push('broad <all_urls> permission is present');
+if (manifest.host_permissions?.length)
+  failures.push('host origins must use the explicit optional permission setup');
+const expectedOptionalOrigins = [
+  '*://*.reddit.com/*',
+  'https://api.redgifs.com/*',
+  'https://*.redgifs.com/*',
+  'https://v.redd.it/*',
+];
+if (
+  JSON.stringify([...(manifest.optional_host_permissions ?? [])].sort()) !==
+  JSON.stringify([...expectedOptionalOrigins].sort())
+) {
+  failures.push('optional host permissions do not match the permission setup origins');
+}
 if (
   manifest.browser_specific_settings?.gecko?.data_collection_permissions?.required?.join(',') !==
   'websiteContent'
@@ -25,6 +39,9 @@ if (
 }
 if (manifest.browser_specific_settings?.gecko?.id !== releaseConfiguration.firefox.extensionId) {
   failures.push('Firefox extension ID does not match release.config.json');
+}
+if (manifest.browser_specific_settings?.gecko_android?.strict_min_version !== '142.0') {
+  failures.push('Firefox Android minimum must cover data_collection_permissions support');
 }
 if (expectedChannel === 'unlisted') {
   if (manifest.browser_specific_settings?.gecko?.update_url !== expectedUpdateUrl) {

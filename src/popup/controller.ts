@@ -10,13 +10,16 @@ import type {
   ScanActivePageResponse,
 } from '@/src/core/domain/messages';
 import { SettingsRepository } from '@/src/core/infrastructure/settingsRepository';
-import { createProviderRegistry } from '@/src/providers/catalog';
+import {
+  containsRequiredHostPermissions,
+  reloadOpenRedditTabs,
+  requestRequiredHostPermissions,
+} from '@/src/core/infrastructure/hostPermissions';
 import { MediaListView } from './mediaList';
 
 export class PopupController {
   private readonly mediaList: MediaListView;
   private readonly activeItems = new Set<string>();
-  private readonly registry = createProviderRegistry();
   private readonly settings = new SettingsRepository();
   private activeTabId?: number;
 
@@ -27,11 +30,18 @@ export class PopupController {
     private readonly optionsButton: HTMLButtonElement,
     private readonly searchInput: HTMLInputElement,
     private readonly clearButton: HTMLButtonElement,
+    private readonly enableAccessButton: HTMLButtonElement,
   ) {
     this.mediaList = new MediaListView(list);
   }
 
   init(): void {
+    this.enableAccessButton.addEventListener('click', () => {
+      // Calling request immediately preserves Firefox's user-action privilege.
+      const permissionRequest = requestRequiredHostPermissions();
+      this.enableAccessButton.disabled = true;
+      void this.finishPermissionRequest(permissionRequest);
+    });
     this.refreshButton.addEventListener('click', () => void this.scan());
     this.optionsButton.addEventListener('click', () => void browser.runtime.openOptionsPage());
     this.searchInput.addEventListener('input', () => this.applySearch());
@@ -46,6 +56,15 @@ export class PopupController {
     this.searchInput.disabled = true;
     this.clearButton.disabled = true;
     try {
+      if (!(await containsRequiredHostPermissions())) {
+        this.enableAccessButton.hidden = false;
+        this.setPageState(
+          'permission',
+          'One-time site access is required before Reddit buttons and provider downloads can work.',
+        );
+        return;
+      }
+      this.enableAccessButton.hidden = true;
       const settings = await this.settings.get();
       const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
       if (tab?.id === undefined) throw new Error('No active browser tab was found.');
@@ -79,6 +98,29 @@ export class PopupController {
       this.setPageState('error', scanErrorMessage(error));
     } finally {
       this.refreshButton.disabled = false;
+    }
+  }
+
+  private async finishPermissionRequest(permissionRequest: Promise<boolean>): Promise<void> {
+    try {
+      const granted = await permissionRequest;
+      if (!granted) {
+        this.setPageState(
+          'error',
+          'Site access was not granted. Click Enable access to try again.',
+        );
+        return;
+      }
+      this.setPageState('ready', 'Access enabled. Reloading Reddit…');
+      await reloadOpenRedditTabs();
+      window.close();
+    } catch (error) {
+      this.setPageState(
+        'error',
+        error instanceof Error ? error.message : 'Firefox could not update the site permissions.',
+      );
+    } finally {
+      this.enableAccessButton.disabled = false;
     }
   }
 
@@ -135,20 +177,6 @@ export class PopupController {
     this.activeItems.add(item.itemId);
     this.mediaList.update(item.itemId, { kind: 'resolving' });
     try {
-      const provider = this.registry.get(item.reference.providerId);
-      const alreadyGranted = await browser.permissions.contains({
-        origins: provider.requiredOrigins,
-      });
-      const granted =
-        alreadyGranted ||
-        (await browser.permissions.request({ origins: provider.requiredOrigins }));
-      if (!granted) {
-        this.mediaList.update(item.itemId, {
-          kind: 'error',
-          message: `${provider.label} access was not granted. Click Retry to ask again.`,
-        });
-        return;
-      }
       const message: ResolveAndDownloadMessage = {
         version: 1,
         type: 'resolve-and-download',

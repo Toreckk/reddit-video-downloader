@@ -62,7 +62,8 @@ export default defineConfig({
     ...(firefoxVersionName ? { version_name: firefoxVersionName } : {}),
     default_locale: 'en',
     permissions: ['downloads', 'storage'],
-    host_permissions: [
+    optional_host_permissions: [
+      '*://*.reddit.com/*',
       'https://api.redgifs.com/*',
       'https://*.redgifs.com/*',
       'https://v.redd.it/*',
@@ -90,6 +91,9 @@ export default defineConfig({
         data_collection_permissions: {
           required: ['websiteContent'],
         },
+      },
+      gecko_android: {
+        strict_min_version: '142.0',
       },
     },
   },
