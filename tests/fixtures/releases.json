@@ -1,0 +1,26 @@
+[
+  {
+    "draft": false,
+    "prerelease": false,
+    "assets": [
+      {
+        "name": "reddit-video-downloader-0.2.0.xpi",
+        "browser_download_url": "https://example.test/v0.2.0.xpi"
+      },
+      {
+        "name": "reddit-video-downloader-0.2.0-sources.zip",
+        "browser_download_url": "https://example.test/v0.2.0-sources.zip"
+      }
+    ]
+  },
+  {
+    "draft": false,
+    "prerelease": true,
+    "assets": [
+      {
+        "name": "reddit-video-downloader-0.2.0.42.xpi",
+        "browser_download_url": "https://example.test/v1.0.0-rc.1.xpi"
+      }
+    ]
+  }
+]

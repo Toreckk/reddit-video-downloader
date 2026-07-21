@@ -1,0 +1,10 @@
+{
+  "firefox": {
+    "extensionId": "reddit-video-downloader@toreckk",
+    "listedFromVersion": "1.0.0",
+    "stableChannelBeforeListed": "unlisted",
+    "prereleaseChannel": "unlisted",
+    "stableUpdateUrl": "https://toreckk.github.io/reddit-video-downloader/updates.json",
+    "prereleaseUpdateUrl": "https://toreckk.github.io/reddit-video-downloader/prerelease-updates.json"
+  }
+}

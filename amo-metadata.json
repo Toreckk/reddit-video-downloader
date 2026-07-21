@@ -1,0 +1,15 @@
+{
+  "summary": {
+    "en-US": "Download supported Redgifs and Reddit-hosted videos directly from Reddit."
+  },
+  "categories": ["download-management"],
+  "homepage": {
+    "en-US": "https://github.com/Toreckk/reddit-video-downloader"
+  },
+  "support_url": {
+    "en-US": "https://github.com/Toreckk/reddit-video-downloader/issues"
+  },
+  "version": {
+    "license": "MIT"
+  }
+}

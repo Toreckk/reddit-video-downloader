@@ -1,0 +1,111 @@
+name: Firefox prerelease
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_version:
+        description: Upcoming stable version, such as 1.0.0
+        required: true
+        type: string
+      rc_number:
+        description: Release-candidate number, such as 1
+        required: true
+        type: number
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: firefox-prerelease
+  cancel-in-progress: false
+
+jobs:
+  publish-firefox:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: firefox-publishing
+    outputs:
+      release_tag: ${{ steps.firefox.outputs.release_tag }}
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Resolve Firefox prerelease version
+        id: firefox
+        run: |
+          node scripts/resolve-firefox-prerelease.mjs \
+            --target-version "${{ inputs.target_version }}" \
+            --rc-number "${{ inputs.rc_number }}" \
+            --build-number "${{ github.run_number }}" \
+            --github-output "$GITHUB_OUTPUT"
+
+      - name: Show publication decision
+        run: |
+          echo "GitHub tag: ${{ steps.firefox.outputs.release_tag }}"
+          echo "Release label: ${{ steps.firefox.outputs.display_version }}"
+          echo "Firefox version: ${{ steps.firefox.outputs.manifest_version }}"
+          echo "Firefox channel: ${{ steps.firefox.outputs.channel }}"
+
+      - name: Verify prerelease source and package
+        run: npm run verify
+        env:
+          FIREFOX_CHANNEL: ${{ steps.firefox.outputs.channel }}
+          FIREFOX_MANIFEST_VERSION: ${{ steps.firefox.outputs.manifest_version }}
+          FIREFOX_UPDATE_URL: ${{ steps.firefox.outputs.update_url }}
+          FIREFOX_VERSION_NAME: ${{ steps.firefox.outputs.display_version }}
+
+      - name: Create Firefox prerelease archives
+        run: npm run zip:firefox
+        env:
+          FIREFOX_CHANNEL: ${{ steps.firefox.outputs.channel }}
+          FIREFOX_MANIFEST_VERSION: ${{ steps.firefox.outputs.manifest_version }}
+          FIREFOX_UPDATE_URL: ${{ steps.firefox.outputs.update_url }}
+          FIREFOX_VERSION_NAME: ${{ steps.firefox.outputs.display_version }}
+
+      - name: Sign Firefox prerelease
+        run: |
+          source_zip=$(find .output -maxdepth 1 -name '*-sources.zip' -print -quit)
+          test -n "$source_zip"
+          WEB_EXT_UPLOAD_SOURCE_CODE="$source_zip" node node_modules/web-ext/bin/web-ext.js sign \
+            --source-dir .output/firefox-mv3 \
+            --artifacts-dir signed-artifacts \
+            --approval-timeout 1800000 \
+            --no-input
+        env:
+          WEB_EXT_API_KEY: ${{ secrets.FIREFOX_JWT_ISSUER }}
+          WEB_EXT_API_SECRET: ${{ secrets.FIREFOX_JWT_SECRET }}
+          WEB_EXT_CHANNEL: unlisted
+
+      - name: Create GitHub prerelease
+        run: |
+          signed_xpi=$(find signed-artifacts -maxdepth 1 -name '*.xpi' -print -quit)
+          source_zip=$(find .output -maxdepth 1 -name '*-sources.zip' -print -quit)
+          test -n "$signed_xpi"
+          canonical_xpi="signed-artifacts/reddit-video-downloader-${{ steps.firefox.outputs.manifest_version }}.xpi"
+          mv "$signed_xpi" "$canonical_xpi"
+          gh release create "${{ steps.firefox.outputs.release_tag }}" \
+            "$canonical_xpi" \
+            "$source_zip" \
+            --prerelease \
+            --target "$GITHUB_SHA" \
+            --title "${{ steps.firefox.outputs.display_version }}" \
+            --notes "Unlisted Firefox release candidate for testing. Firefox package version: ${{ steps.firefox.outputs.manifest_version }}."
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  deploy-update-pages:
+    needs: publish-firefox
+    if: needs.publish-firefox.result == 'success'
+    uses: ./.github/workflows/pages.yml

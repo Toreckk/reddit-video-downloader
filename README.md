@@ -30,6 +30,17 @@ The unpacked Firefox MV3 build is written to `.output/firefox-mv3/`. The release
 
 See [docs/manual-testing.md](docs/manual-testing.md) for temporary installation and the first manual acceptance pass. The full design is in [docs/firefox-media-downloader-extension-plan.md](docs/firefox-media-downloader-extension-plan.md).
 
+## Releases
+
+The project starts at `0.2.0`. Release Please derives future stable versions from conventional commit
+messages and maintains the changelog and GitHub Release PR. Stable versions below `1.0.0` and all
+release candidates are Mozilla-signed but unlisted; stable versions from `1.0.0` onward are submitted
+to the public Firefox Add-ons listing.
+
+Signed self-distributed releases update through GitHub Pages. See
+[docs/releasing.md](docs/releasing.md) for the channel policy, release-candidate workflow, signing
+process, and required repository environment.
+
 ## Privacy and permissions
 
 - `downloads`: starts the download you explicitly select.

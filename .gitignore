@@ -3,6 +3,11 @@ node_modules/
 .wxt/
 coverage/
 web-ext-artifacts/
+signed-artifacts/
+pages-output/
+.env.submit
+.env.*.local
+web-ext-config.local.*
 *.log
 .DS_Store
 Thumbs.db

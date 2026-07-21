@@ -1,6 +1,6 @@
 {
   "name": "reddit-video-downloader",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "A modular Firefox extension for downloading videos embedded in Reddit posts.",
@@ -19,8 +19,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "check:manifest": "node scripts/check-firefox-manifest.mjs",
-    "lint:extension": "web-ext lint --source-dir .output/firefox-mv3",
-    "verify": "npm run format:check && npm run typecheck && npm run lint && npm run test && npm run build:firefox && npm run check:manifest && npm run lint:extension"
+    "check:release": "node scripts/check-release-config.mjs",
+    "check:updates": "node scripts/generate-update-manifests.mjs --releases-file tests/fixtures/releases.json --output-dir pages-output && node scripts/check-update-manifests.mjs",
+    "lint:extension": "node scripts/lint-firefox-extension.mjs",
+    "verify": "npm run format:check && npm run typecheck && npm run lint && npm run test && npm run check:release && npm run check:updates && npm run build:firefox && npm run check:manifest && npm run lint:extension"
   },
   "devDependencies": {
     "@types/firefox-webext-browser": "^143.0.0",

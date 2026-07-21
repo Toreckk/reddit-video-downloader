@@ -30,3 +30,7 @@ The extension does not retain provider tokens beyond an in-memory temporary cach
 Host access is limited to Redgifs API/media hosts and `v.redd.it`. These permissions are installed with the extension because Firefox does not allow an action injected into a normal webpage to request optional permissions. You can inspect the permissions or disable/remove the extension from Firefox's Add-ons Manager.
 
 The project source and issue tracker are available at <https://github.com/Toreckk/reddit-video-downloader>.
+
+Self-distributed Firefox installations periodically request the project's static update manifest from
+GitHub Pages. Firefox performs this update check; the extension does not add analytics or identifiers
+to the request. Signed extension packages are hosted as GitHub Release assets.
