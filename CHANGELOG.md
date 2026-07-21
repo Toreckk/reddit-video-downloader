@@ -20,6 +20,7 @@
   version lower than the upcoming stable version.
 - Deploy update pages from the released `master` workflow instead of starting a redundant tag-based
   Pages deployment that conflicts with environment branch protection.
+- Allow the update-feed generator to use GitHub's public releases API when no token is available.
 
 ### Other changes
 

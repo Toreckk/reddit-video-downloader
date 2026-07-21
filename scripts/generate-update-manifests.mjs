@@ -21,17 +21,16 @@ function compareVersionsDescending(left, right) {
 
 async function fetchReleases(repository, token) {
   const releases = [];
+  const headers = {
+    Accept: 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28',
+  };
+  if (token) headers.Authorization = `Bearer ${token}`;
 
   for (let page = 1; ; page += 1) {
     const response = await fetch(
       `https://api.github.com/repos/${repository}/releases?per_page=100&page=${page}`,
-      {
-        headers: {
-          Accept: 'application/vnd.github+json',
-          Authorization: `Bearer ${token}`,
-          'X-GitHub-Api-Version': '2022-11-28',
-        },
-      },
+      { headers },
     );
 
     if (!response.ok) {
