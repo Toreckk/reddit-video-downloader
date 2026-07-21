@@ -1,6 +1,19 @@
 # Manual testing in Firefox
 
-## One-time setup
+## Signed release installation
+
+1. Open `about:addons` in Firefox.
+2. From the settings cog, choose **Install Add-on From File…** and select the Mozilla-signed `.xpi`.
+3. On the setup page, select **Enable Reddit downloads** and approve the requested Reddit, Redgifs,
+   and `v.redd.it` access.
+4. Existing Reddit tabs reload automatically. Confirm inline Download actions appear without opening
+   the toolbar popup.
+5. Restart Firefox and confirm the extension remains installed.
+
+Firefox displays a notification dot while required Manifest V3 site access is missing. If setup was
+closed or access was later revoked, open the toolbar popup and select **Enable access**.
+
+## Temporary development installation
 
 1. Run `npm install`, then `npm run build:firefox` in this repository.
 2. Open Firefox and enter `about:debugging#/runtime/this-firefox` in the address bar.
@@ -8,7 +21,10 @@
 4. Choose `.output/firefox-mv3/manifest.json` from this repository.
 5. Pin **Reddit Media Downloader** from Firefox's Extensions menu so its toolbar icon is visible.
 
-A temporary add-on remains installed until Firefox restarts. After rebuilding, return to `about:debugging`, find the extension, and click **Reload**. Reload any Reddit tabs too, because content scripts already present in a tab are not replaced automatically.
+A temporary add-on remains installed until Firefox restarts. After rebuilding, return to
+`about:debugging`, find the extension, and click **Reload**. Reload any Reddit tabs too, because
+content scripts already present in a tab are not replaced automatically. Temporary builds may retain
+development host grants, so permission behavior must always be accepted once with a signed build.
 
 ## First acceptance pass
 

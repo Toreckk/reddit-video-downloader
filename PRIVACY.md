@@ -27,7 +27,10 @@ The extension does not retain provider tokens beyond an in-memory temporary cach
 
 ## Control
 
-Host access is limited to Redgifs API/media hosts and `v.redd.it`. These permissions are installed with the extension because Firefox does not allow an action injected into a normal webpage to request optional permissions. You can inspect the permissions or disable/remove the extension from Firefox's Add-ons Manager.
+Host access is limited to Reddit, Redgifs API/media hosts, and `v.redd.it`. Firefox asks you to approve
+these optional host permissions from an extension-owned setup page. Reddit access enables detection
+and inline actions; provider access is used only after you select Download. You can inspect or revoke
+the permissions, or disable/remove the extension, from Firefox's Add-ons Manager.
 
 The project source and issue tracker are available at <https://github.com/Toreckk/reddit-video-downloader>.
 
