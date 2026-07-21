@@ -156,6 +156,13 @@ export class InlineDownloadController {
 function findActionMount(context: PostContext): HTMLElement | null {
   const post = context.postElement;
   if (context.surfaceId === 'reddit-old') {
+    if (post.matches('.search-result.search-result-link')) {
+      return (
+        post.querySelector<HTMLElement>('.search-result-meta') ??
+        post.querySelector<HTMLElement>('a.search-link')?.parentElement ??
+        post
+      );
+    }
     return (
       post.querySelector<HTMLElement>('ul.flat-list.buttons, .flat-list.buttons, ul.buttons') ??
       post.querySelector<HTMLElement>('.entry')
@@ -181,9 +188,10 @@ function installStyles(): void {
   style.textContent = `
     .rmd-inline-action { display: inline-flex; align-items: center; gap: 0.4rem; margin-left: 0.4rem; }
     .rmd-inline-action--reddit-current { padding: 0.25rem 0; }
-    .rmd-inline-download { border: 0; background: transparent; color: inherit; cursor: pointer; font: inherit; font-weight: 600; padding: 0; }
-    .rmd-inline-download:hover:not(:disabled) { text-decoration: underline; }
-    .rmd-inline-download:disabled { cursor: wait; opacity: 0.7; }
+    .rmd-inline-download { background: #005ea8; border: 1px solid #8bcfff; border-radius: 3px; color: #fff !important; cursor: pointer; font: inherit; font-weight: 600; line-height: 1.35; padding: 1px 5px; }
+    .rmd-inline-download:hover:not(:disabled) { background: #00477f; border-color: #fff; text-decoration: none; }
+    .rmd-inline-download:focus-visible { outline: 2px solid #ffbf47; outline-offset: 2px; }
+    .rmd-inline-download:disabled { background: #465d6f; cursor: wait; opacity: 0.8; }
     .rmd-inline-status { color: #d93900; font-size: 0.9em; max-width: 32rem; }
     .rmd-inline-status:empty { display: none; }
   `;

@@ -4,7 +4,7 @@ A privacy-focused Firefox extension that finds supported videos in Reddit and do
 
 ## Features
 
-- Adds a compact Download action to supported posts on old and current Reddit, including dynamically loaded posts.
+- Adds a compact Download action to supported posts on old and current Reddit, including old Reddit search results and dynamically loaded posts.
 - Scans old and current Reddit when the toolbar popup opens or you click Refresh.
 - Shows opened supported embeds by default, with an option to scan every supported link loaded on the page.
 - Filters long lists by title, Reddit user, subreddit, provider, or media ID.

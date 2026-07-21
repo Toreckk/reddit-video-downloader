@@ -20,7 +20,9 @@ export class OldRedditAdapter implements SiteSurfaceAdapter {
 
   discover(root: ParentNode): PostContext[] {
     const posts = Array.from(
-      root.querySelectorAll<HTMLElement>('.thing.link, .thing[data-fullname]'),
+      root.querySelectorAll<HTMLElement>(
+        '.thing.link, .thing[data-fullname], .search-result.search-result-link',
+      ),
     );
     return posts.map((post, documentOrder) => {
       const postId =
@@ -42,12 +44,19 @@ export class OldRedditAdapter implements SiteSurfaceAdapter {
         documentOrder,
         isVisible: elementIsVisible(post),
       };
-      assignIfPresent(context, 'title', textFrom(post, ['a.title', '.title > a', 'h1']));
+      assignIfPresent(
+        context,
+        'title',
+        textFrom(post, ['a.title', '.title > a', 'a.search-title', 'h1']),
+      );
       assignIfPresent(context, 'author', textFrom(post, ['a.author', '[data-author]']));
       assignIfPresent(
         context,
         'subreddit',
-        stripPrefix(textFrom(post, ['a.subreddit', '.subreddit']), /^r\//i),
+        stripPrefix(
+          textFrom(post, ['a.subreddit', '.subreddit', 'a.search-subreddit-link']),
+          /^r\//i,
+        ),
       );
       assignIfPresent(context, 'thumbnailUrl', thumbnailFrom(post, ['data-thumbnail']));
       return context;

@@ -21,8 +21,9 @@ A temporary add-on remains installed until Firefox restarts. After rebuilding, r
 7. Click **download** on a `v.redd.it` post. While it prepares, confirm the action shows **preparing…**. Play the resulting MP4 and verify that it contains both video and audio when the source has audio.
 8. Leave another native Reddit video collapsed and confirm it is absent from the opened-only popup. Expand its native player, click **Refresh**, and confirm it appears without relying on a new network request.
 9. Scroll until Reddit dynamically loads more posts and confirm supported posts receive inline actions without reloading the extension.
-10. Use the popup search field, then click **Clear shown**. Confirm only the filtered rows are cleared, reopening the popup keeps them cleared, and reloading Reddit restores them.
-11. Open the options page from the popup gear. Test **All supported links loaded on the page**, **Prefer SD**, **Always ask where to save**, and the fallback template `{sourceCreator|creator} - {title}`.
+10. Open an old Reddit search page containing Redgifs or `v.redd.it` results. Confirm each supported search card receives a **download** action in its metadata row and downloads with the result's title and Reddit author.
+11. Use the popup search field, then click **Clear shown**. Confirm only the filtered rows are cleared, reopening the popup keeps them cleared, and reloading Reddit restores them.
+12. Open the options page from the popup gear. Test **All supported links loaded on the page**, **Prefer SD**, **Always ask where to save**, and the fallback template `{sourceCreator|creator} - {title}`.
 
 ## Inspecting download errors
 

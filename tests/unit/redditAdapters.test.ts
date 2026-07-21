@@ -5,9 +5,11 @@ import { OldRedditAdapter } from '@/src/surfaces/reddit/oldRedditAdapter';
 import { InlineDownloadController } from '@/src/surfaces/reddit/inlineDownloadController';
 import { ProviderRegistry } from '@/src/core/application/providerRegistry';
 import { RedgifsProvider } from '@/src/providers/redgifs';
+import { VRedditProvider } from '@/src/providers/vreddit';
 import type { HttpClient } from '@/src/core/infrastructure/extensionHttpClient';
 
 const oldFixture = readFileSync('tests/fixtures/reddit-old/listing.html', 'utf8');
+const oldSearchFixture = readFileSync('tests/fixtures/reddit-old/search.html', 'utf8');
 const currentFixture = readFileSync('tests/fixtures/reddit-current/listing.html', 'utf8');
 const neverHttp: HttpClient = {
   get: async () => Promise.reject(new Error('DOM discovery must not call the provider API')),
@@ -86,5 +88,37 @@ describe('Reddit surface adapters', () => {
     ).toBeNull();
     controller.stop();
     expect(document.querySelector('.rmd-inline-download')).toBeNull();
+  });
+
+  it('discovers old Reddit search cards and mounts actions in their metadata rows', () => {
+    window.history.replaceState({}, '', 'https://www.reddit.com/search?q=url%3Av.redd.it');
+    document.body.innerHTML = oldSearchFixture;
+    const adapter = new OldRedditAdapter();
+    const contexts = adapter.discover(document);
+
+    expect(contexts).toHaveLength(3);
+    expect(contexts[0]).toMatchObject({
+      postId: 't3_vreddit_search',
+      title: 'Crystal chase',
+      author: 'joenun',
+      subreddit: 'nunvids',
+    });
+    expect(contexts[0]?.outboundUrls.map(String)).toContain('https://v.redd.it/xxl4555bd18f1');
+
+    const controller = new InlineDownloadController(
+      new ProviderRegistry([new RedgifsProvider(neverHttp), new VRedditProvider(neverHttp)]),
+      [adapter],
+    );
+    controller.start();
+    expect(document.querySelectorAll('.rmd-inline-download')).toHaveLength(2);
+    expect(
+      document.querySelector(
+        '[data-fullname="t3_vreddit_search"] .search-result-meta .rmd-inline-download',
+      ),
+    ).not.toBeNull();
+    expect(
+      document.querySelector('[data-fullname="t3_unsupported_search"] .rmd-inline-download'),
+    ).toBeNull();
+    controller.stop();
   });
 });
