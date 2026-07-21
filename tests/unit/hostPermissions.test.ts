@@ -2,8 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const browserMocks = vi.hoisted(() => ({
   contains: vi.fn(),
-  create: vi.fn(),
-  getURL: vi.fn((path: string) => `moz-extension://fixture${path}`),
   reload: vi.fn(),
   request: vi.fn(),
   query: vi.fn(),
@@ -15,9 +13,7 @@ vi.mock('wxt/browser', () => ({
       contains: browserMocks.contains,
       request: browserMocks.request,
     },
-    runtime: { getURL: browserMocks.getURL },
     tabs: {
-      create: browserMocks.create,
       query: browserMocks.query,
       reload: browserMocks.reload,
     },
@@ -26,7 +22,6 @@ vi.mock('wxt/browser', () => ({
 
 import {
   containsRequiredHostPermissions,
-  openPermissionSetup,
   REDDIT_REQUIRED_ORIGINS,
   reloadOpenRedditTabs,
   REQUIRED_HOST_ORIGINS,
@@ -58,16 +53,5 @@ describe('host permissions', () => {
     expect(browserMocks.reload).toHaveBeenCalledTimes(2);
     expect(browserMocks.reload).toHaveBeenNthCalledWith(1, 11);
     expect(browserMocks.reload).toHaveBeenNthCalledWith(2, 12);
-  });
-
-  it('opens the extension-owned setup page', async () => {
-    browserMocks.create.mockResolvedValue({});
-
-    await openPermissionSetup();
-
-    expect(browserMocks.getURL).toHaveBeenCalledWith('/onboarding.html');
-    expect(browserMocks.create).toHaveBeenCalledWith({
-      url: 'moz-extension://fixture/onboarding.html',
-    });
   });
 });

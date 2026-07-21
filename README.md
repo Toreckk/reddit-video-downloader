@@ -14,8 +14,8 @@ A privacy-focused Firefox extension that finds supported videos in Reddit and do
 - Creates safe `{sourceCreator|creator} - {title}.mp4` filenames using the source uploader's display name when available, falling back to its account handle and then the Reddit user, and lets Firefox uniquify duplicates.
 - Includes quality, save-dialog, and filename-template options.
 - Uses no analytics, accounts, browsing-history storage, external backend, or request interception.
-- Opens a one-time Firefox permission setup so Reddit buttons and provider downloads work immediately
-  after access is approved.
+- Uses Firefox's installation permission prompt so Reddit buttons and provider downloads work
+  immediately after access is approved.
 
 ## Development
 
@@ -52,9 +52,9 @@ process, and required repository environment.
 - Reddit page access: runs the lightweight, on-demand detector.
 - Provider host access: limited to Redgifs API/media hosts and `v.redd.it`, allowing Download actions inside Reddit posts to work on their first click.
 
-Firefox treats Manifest V3 host access as user-controlled. After installation or an update that needs
-access, the extension opens a one-time setup page. Approving it enables Reddit, Redgifs, and
-`v.redd.it`; open Reddit tabs are reloaded so inline buttons appear immediately.
+Firefox treats Manifest V3 host access as user-controlled. The normal installation prompt requests
+Reddit, Redgifs, and `v.redd.it` access; open Reddit tabs are then reloaded so inline buttons appear
+immediately. If access is declined or later revoked, the popup offers an **Enable access** fallback.
 
 No user or post history is persisted.
 

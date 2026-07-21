@@ -9,7 +9,7 @@ import { BrowserMediaAssetPreparer } from '@/src/core/infrastructure/mediaAssetP
 import { SettingsRepository } from '@/src/core/infrastructure/settingsRepository';
 import {
   containsRequiredHostPermissions,
-  openPermissionSetup,
+  reloadOpenRedditTabs,
 } from '@/src/core/infrastructure/hostPermissions';
 import { createProviderRegistry } from '@/src/providers/catalog';
 
@@ -25,7 +25,7 @@ export default defineBackground(() => {
   );
 
   browser.runtime.onInstalled.addListener(() => {
-    void showPermissionSetupWhenNeeded();
+    void reloadRedditTabsWhenPermitted();
   });
 
   // Firefox supports promise-returning message listeners, despite the event type's void callback shape.
@@ -66,6 +66,6 @@ export default defineBackground(() => {
   });
 });
 
-async function showPermissionSetupWhenNeeded(): Promise<void> {
-  if (!(await containsRequiredHostPermissions())) await openPermissionSetup();
+async function reloadRedditTabsWhenPermitted(): Promise<void> {
+  if (await containsRequiredHostPermissions()) await reloadOpenRedditTabs();
 }

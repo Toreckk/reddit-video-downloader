@@ -17,20 +17,20 @@ if (!manifest.action?.default_popup) failures.push('action.default_popup is miss
 if (manifest.permissions?.includes('tabs')) failures.push('unnecessary tabs permission is present');
 if (manifest.host_permissions?.includes('<all_urls>'))
   failures.push('broad <all_urls> permission is present');
-if (manifest.host_permissions?.length)
-  failures.push('host origins must use the explicit optional permission setup');
-const expectedOptionalOrigins = [
+const expectedHostOrigins = [
   '*://*.reddit.com/*',
   'https://api.redgifs.com/*',
   'https://*.redgifs.com/*',
   'https://v.redd.it/*',
 ];
 if (
-  JSON.stringify([...(manifest.optional_host_permissions ?? [])].sort()) !==
-  JSON.stringify([...expectedOptionalOrigins].sort())
+  JSON.stringify([...(manifest.host_permissions ?? [])].sort()) !==
+  JSON.stringify([...expectedHostOrigins].sort())
 ) {
-  failures.push('optional host permissions do not match the permission setup origins');
+  failures.push('host permissions do not match the required Reddit and provider origins');
 }
+if (manifest.optional_host_permissions?.length)
+  failures.push('required host origins must not be declared optional');
 if (
   manifest.browser_specific_settings?.gecko?.data_collection_permissions?.required?.join(',') !==
   'websiteContent'

@@ -62,7 +62,7 @@ export default defineConfig({
     ...(firefoxVersionName ? { version_name: firefoxVersionName } : {}),
     default_locale: 'en',
     permissions: ['downloads', 'storage'],
-    optional_host_permissions: [
+    host_permissions: [
       '*://*.reddit.com/*',
       'https://api.redgifs.com/*',
       'https://*.redgifs.com/*',

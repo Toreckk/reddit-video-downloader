@@ -6,9 +6,9 @@
 
 #### Reliable Firefox permissions
 
-- Add a one-time setup page that requests Reddit, Redgifs, and `v.redd.it` access from a valid
-  extension-owned user action.
-- Reload open Reddit tabs after access is granted so inline Download actions appear immediately.
+- Request Reddit, Redgifs, and `v.redd.it` access through Firefox's normal installation prompt.
+- Reload open Reddit tabs after installation so inline Download actions appear immediately.
+- Provide a valid popup action to restore access if permissions were declined or later revoked.
 - Show a permission-specific error instead of reporting missing provider access as a network failure.
 
 #### Release workflow

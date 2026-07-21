@@ -28,7 +28,3 @@ export async function reloadOpenRedditTabs(): Promise<void> {
     tabs.map((tab) => (tab.id === undefined ? Promise.resolve() : browser.tabs.reload(tab.id))),
   );
 }
-
-export async function openPermissionSetup(): Promise<void> {
-  await browser.tabs.create({ url: browser.runtime.getURL('/onboarding.html') });
-}

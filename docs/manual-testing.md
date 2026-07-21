@@ -4,14 +4,13 @@
 
 1. Open `about:addons` in Firefox.
 2. From the settings cog, choose **Install Add-on From File…** and select the Mozilla-signed `.xpi`.
-3. On the setup page, select **Enable Reddit downloads** and approve the requested Reddit, Redgifs,
-   and `v.redd.it` access.
+3. In Firefox's installation prompt, approve the requested Reddit, Redgifs, and `v.redd.it` access.
 4. Existing Reddit tabs reload automatically. Confirm inline Download actions appear without opening
    the toolbar popup.
 5. Restart Firefox and confirm the extension remains installed.
 
-Firefox displays a notification dot while required Manifest V3 site access is missing. If setup was
-closed or access was later revoked, open the toolbar popup and select **Enable access**.
+Firefox displays a notification dot while required Manifest V3 site access is missing. If access was
+declined or later revoked, open the toolbar popup and select **Enable access**.
 
 ## Temporary development installation
 
