@@ -4,6 +4,7 @@ import {
   resolvePrerelease,
   writeGitHubOutput,
 } from './firefox-release-policy.mjs';
+import { execFileSync } from 'node:child_process';
 
 function requiredOption(name) {
   const index = process.argv.indexOf(name);
@@ -12,14 +13,30 @@ function requiredOption(name) {
   return value;
 }
 
+function optionalOption(name) {
+  const index = process.argv.indexOf(name);
+  return index === -1 ? undefined : process.argv[index + 1];
+}
+
 const configuration = await loadReleaseConfiguration();
-const baseVersion = await loadPackageVersion();
+const packageVersion = await loadPackageVersion();
+const baseRef = optionalOption('--base-ref');
+const baseVersion = baseRef
+  ? JSON.parse(execFileSync('git', ['show', `${baseRef}:package.json`], { encoding: 'utf8' }))
+      .version
+  : packageVersion;
+const targetVersion = requiredOption('--target-version');
+if (baseRef && targetVersion !== packageVersion) {
+  throw new Error(
+    `The prerelease target ${targetVersion} must match the version branch package ${packageVersion}`,
+  );
+}
 const release = resolvePrerelease(
   {
     baseVersion,
     buildNumber: Number(requiredOption('--build-number')),
     rcNumber: Number(requiredOption('--rc-number')),
-    targetVersion: requiredOption('--target-version'),
+    targetVersion,
   },
   configuration,
 );

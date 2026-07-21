@@ -6,8 +6,9 @@ const refresh = requiredElement<HTMLButtonElement>('#refresh');
 const options = requiredElement<HTMLButtonElement>('#options');
 const search = requiredElement<HTMLInputElement>('#media-search');
 const clear = requiredElement<HTMLButtonElement>('#clear-shown');
+const enableAccess = requiredElement<HTMLButtonElement>('#enable-access');
 
-new PopupController(status, list, refresh, options, search, clear).init();
+new PopupController(status, list, refresh, options, search, clear, enableAccess).init();
 
 function requiredElement<T extends Element>(selector: string): T {
   const element = document.querySelector<T>(selector);

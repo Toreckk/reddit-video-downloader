@@ -32,6 +32,8 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v7
@@ -46,6 +48,7 @@ jobs:
         id: firefox
         run: |
           node scripts/resolve-firefox-prerelease.mjs \
+            --base-ref origin/master \
             --target-version "${{ inputs.target_version }}" \
             --rc-number "${{ inputs.rc_number }}" \
             --build-number "${{ github.run_number }}" \

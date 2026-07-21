@@ -138,6 +138,26 @@ body[data-state='error'] .page-status {
   color: #a1261d;
 }
 
+.enable-access {
+  margin: 0 16px 14px;
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 13px;
+  background: #005ea8;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.enable-access:hover:not(:disabled) {
+  background: #00477f;
+}
+
+.enable-access:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
 .media-list {
   margin: 0;
   padding: 0;

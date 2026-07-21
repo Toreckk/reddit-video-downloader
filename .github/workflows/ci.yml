@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v7
@@ -27,6 +29,14 @@ jobs:
 
       - name: Verify source and Firefox package
         run: npm run verify
+
+      - name: Verify release proposal
+        if: >-
+          (github.event_name == 'pull_request' && github.base_ref == 'master') ||
+          (github.event_name == 'push' && startsWith(github.ref_name, 'release/v'))
+        run: node scripts/check-release-pr.mjs --base-ref origin/master --head-ref "$RELEASE_HEAD_REF"
+        env:
+          RELEASE_HEAD_REF: ${{ github.head_ref || github.ref_name }}
 
       - name: Create release and source archives
         run: npm run zip:firefox
