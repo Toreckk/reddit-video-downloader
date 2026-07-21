@@ -26,8 +26,24 @@ jobs:
       version: ${{ steps.release.outputs.version }}
 
     steps:
+      - name: Check out release metadata
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Check initial release bootstrap
+        id: bootstrap
+        run: |
+          if git rev-parse --quiet --verify refs/tags/v0.2.0 >/dev/null; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "Release Please will start after the initial v0.2.0 release is tagged."
+          fi
+
       - name: Create or update release pull request
         id: release
+        if: steps.bootstrap.outputs.ready == 'true'
         uses: googleapis/release-please-action@v5
 
   publish-firefox:
