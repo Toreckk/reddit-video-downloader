@@ -3,6 +3,11 @@ name: Firefox update pages
 on:
   workflow_call:
   workflow_dispatch:
+  release:
+    types:
+      - published
+      - edited
+      - deleted
   push:
     branches:
       - master
