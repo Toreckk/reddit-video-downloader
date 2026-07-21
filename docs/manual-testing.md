@@ -42,6 +42,8 @@ development host grants, so permission behavior must always be accepted once wit
     clean profile, then test both its enabled and disabled behavior. Also test **All supported links
     loaded on the page**, **Prefer SD**, and the fallback template
     `{sourceCreator|creator} - {title}`.
+13. On Firefox for Android, confirm downloads use the normal Android behavior without failing when
+    **Always ask where to save** is enabled.
 
 ## Inspecting download errors
 

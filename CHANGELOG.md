@@ -17,6 +17,8 @@
 - Ask where to save every video by default for new and previously unconfigured installations.
 - Keep an explicit opt-out in Options; when disabled, downloads use Firefox's configured Downloads
   folder and Firefox's own download behavior.
+- Fall back to Android's normal download behavior because Firefox for Android does not support the
+  `saveAs` file chooser.
 
 ## 0.2.1 (2026-07-21)
 
