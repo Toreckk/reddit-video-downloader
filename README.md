@@ -38,9 +38,10 @@ manual acceptance pass. See [CONTRIBUTING.md](CONTRIBUTING.md) for the version-b
 
 Each stable version is staged on `release/vX.Y.Z`, including its implementation, package version, and
 curated changelog. A reviewed merge into protected `master` automatically submits the same version
-to Mozilla and creates a pending draft. A resumable finalizer publishes the tag and GitHub Release
-after Mozilla signing. Stable versions below `1.0.0` and all release candidates are Mozilla-signed
-but unlisted; stable versions from `1.0.0` onward are submitted to the public Firefox Add-ons listing.
+to Mozilla and creates a pending draft. A bounded, resumable finalizer publishes the tag and GitHub
+Release after Mozilla signing. Stable versions below `1.0.0` and all release candidates are
+Mozilla-signed but unlisted; stable versions from `1.0.0` onward are submitted to the public Firefox
+Add-ons listing.
 
 Signed self-distributed releases update through GitHub Pages. See
 [docs/releasing.md](docs/releasing.md) for the channel policy, release-candidate workflow, signing

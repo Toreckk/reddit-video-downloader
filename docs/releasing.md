@@ -36,14 +36,17 @@ Merging the release pull request starts `.github/workflows/release.yml`:
 4. Run the complete verification suite and create the Firefox and source archives.
 5. Create a draft GitHub Release at the exact merge commit with the review and source archives.
 6. Submit the extension and source archive to Mozilla once, without waiting in the runner for review.
-7. Run `.github/workflows/firefox-release-finalizer.yml` immediately and every 15 minutes.
+7. Start `.github/workflows/firefox-release-finalizer.yml` immediately and poll Mozilla for up to 30
+   minutes.
 8. When Mozilla marks an unlisted file public, download and verify the signed XPI, attach it to the
    draft, publish the tag and GitHub Release, and refresh the GitHub Pages update manifests.
 
 The draft release is the durable handoff between submission and signing, so Mozilla reviews may take
-hours or days without losing release state. The finalizer is idempotent and can also be started safely
-with **Actions -> Firefox release finalizer -> Run workflow**; it never submits a version again.
-Do not rerun the original submission workflow after Mozilla accepted a version.
+hours or days without losing release state. No scheduled Actions run between releases. If approval
+takes longer than 30 minutes, the finalizer fails without losing the draft; after Mozilla approval,
+use **Re-run failed jobs** on that run or start **Actions -> Firefox release finalizer -> Run
+workflow**. The finalizer is idempotent and never submits a version again. Do not rerun the original
+submission workflow after Mozilla accepted a version.
 
 If validation fails before Mozilla accepts the version, inspect the Release workflow and the draft.
 Fix the version branch, advance to a new version when Mozilla already owns the failed version number,
