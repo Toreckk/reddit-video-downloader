@@ -13,9 +13,13 @@ interface InlineAction {
   item: DetectedMediaItem;
   wrapper: HTMLElement;
   button: HTMLButtonElement;
-  status: HTMLElement;
   busy: boolean;
+  toast?: HTMLElement;
+  toastTimer?: number;
 }
+
+const ERROR_TOAST_DURATION_MS = 8000;
+const WARNING_TOAST_DURATION_MS = 6000;
 
 export class InlineDownloadController {
   private readonly actions = new Map<HTMLElement, InlineAction>();
@@ -36,8 +40,12 @@ export class InlineDownloadController {
 
   stop(): void {
     this.observer?.disconnect();
-    for (const action of this.actions.values()) action.wrapper.remove();
+    for (const action of this.actions.values()) {
+      dismissToast(action);
+      action.wrapper.remove();
+    }
     this.actions.clear();
+    document.getElementById('rmd-toast-region')?.remove();
   }
 
   private queueSync(): void {
@@ -70,6 +78,7 @@ export class InlineDownloadController {
 
     for (const [post, action] of this.actions) {
       if (post.isConnected && activePosts.has(post)) continue;
+      dismissToast(action);
       action.wrapper.remove();
       this.actions.delete(post);
     }
@@ -79,7 +88,7 @@ export class InlineDownloadController {
     const existing = this.actions.get(context.postElement);
     if (existing) {
       existing.item = item;
-      if (!existing.wrapper.isConnected) mount.append(existing.wrapper);
+      placeAction(mount, existing.wrapper);
       return;
     }
 
@@ -90,14 +99,10 @@ export class InlineDownloadController {
     button.className = 'rmd-inline-download';
     button.textContent = 'download';
     button.title = `Download this ${item.providerLabel} video`;
-    const status = document.createElement('span');
-    status.className = 'rmd-inline-status';
-    status.setAttribute('role', 'status');
-    status.setAttribute('aria-live', 'polite');
-    wrapper.append(button, status);
-    mount.append(wrapper);
+    wrapper.append(button);
+    placeAction(mount, wrapper);
 
-    const action: InlineAction = { item, wrapper, button, status, busy: false };
+    const action: InlineAction = { item, wrapper, button, busy: false };
     this.actions.set(context.postElement, action);
     button.addEventListener('click', (event) => {
       event.preventDefault();
@@ -111,7 +116,7 @@ export class InlineDownloadController {
     action.busy = true;
     action.button.disabled = true;
     action.button.textContent = 'preparing…';
-    action.status.textContent = '';
+    dismissToast(action);
     const message: ResolveAndDownloadMessage = {
       version: 1,
       type: 'resolve-and-download',
@@ -127,14 +132,15 @@ export class InlineDownloadController {
           code: 'UNKNOWN_ERROR' as const,
           message: 'The extension did not respond.',
         };
+        const errorMessage = formatDownloadError(error);
         action.button.textContent = 'retry';
-        action.button.title = formatDownloadError(error);
-        action.status.textContent = formatDownloadError(error);
+        action.button.title = errorMessage;
+        showToast(action, errorMessage, 'error');
         return;
       }
       action.button.textContent = 'downloaded';
       action.button.title = response.value.warning ?? 'Download started.';
-      action.status.textContent = response.value.warning ?? '';
+      if (response.value.warning) showToast(action, response.value.warning, 'warning');
       window.setTimeout(() => {
         if (!action.wrapper.isConnected) return;
         action.button.textContent = 'download';
@@ -145,12 +151,30 @@ export class InlineDownloadController {
       const message = error instanceof Error ? error.message : 'The download could not be started.';
       action.button.textContent = 'retry';
       action.button.title = message;
-      action.status.textContent = message;
+      showToast(action, message, 'error');
     } finally {
       action.busy = false;
       if (action.button.textContent !== 'downloaded') action.button.disabled = false;
     }
   }
+}
+
+function placeAction(mount: HTMLElement, wrapper: HTMLElement): void {
+  const combinedLink = mount.querySelector<HTMLElement>(
+    'a.noCtrlF[data-text="[l+c]"], a.noCtrlF[data-text="[l=c]"]',
+  );
+  if (combinedLink) {
+    let reference = combinedLink;
+    while (reference.parentElement && reference.parentElement !== mount) {
+      reference = reference.parentElement;
+    }
+    if (reference.parentElement === mount) {
+      if (reference.nextElementSibling !== wrapper) reference.after(wrapper);
+      return;
+    }
+  }
+
+  if (wrapper.parentElement !== mount || wrapper !== mount.lastElementChild) mount.append(wrapper);
 }
 
 function findActionMount(context: PostContext): HTMLElement | null {
@@ -192,10 +216,56 @@ function installStyles(): void {
     .rmd-inline-download:hover:not(:disabled) { background: #00477f; border-color: #fff; text-decoration: none; }
     .rmd-inline-download:focus-visible { outline: 2px solid #ffbf47; outline-offset: 2px; }
     .rmd-inline-download:disabled { background: #465d6f; cursor: wait; opacity: 0.8; }
-    .rmd-inline-status { color: #d93900; font-size: 0.9em; max-width: 32rem; }
-    .rmd-inline-status:empty { display: none; }
+    #rmd-toast-region { bottom: 1rem; display: grid; gap: 0.5rem; max-width: min(26rem, calc(100vw - 2rem)); pointer-events: none; position: fixed; right: 1rem; width: max-content; z-index: 2147483647; }
+    .rmd-toast { align-items: start; background: #fff; border: 1px solid #8c8c8c; border-left: 4px solid #b85c00; border-radius: 4px; box-shadow: 0 3px 12px rgb(0 0 0 / 28%); color: #1a1a1b; display: grid; font: 13px/1.4 Arial, sans-serif; gap: 0.75rem; grid-template-columns: minmax(0, 1fr) auto; padding: 0.7rem 0.8rem; pointer-events: auto; }
+    .rmd-toast--error { border-left-color: #d93900; }
+    .rmd-toast-message { overflow-wrap: anywhere; }
+    .rmd-toast-close { appearance: none; background: transparent; border: 0; color: inherit; cursor: pointer; font: 700 18px/1 Arial, sans-serif; margin: -0.15rem -0.2rem 0 0; padding: 0.1rem 0.2rem; }
+    .rmd-toast-close:focus-visible { outline: 2px solid #005ea8; outline-offset: 2px; }
+    @media (prefers-color-scheme: dark) { .rmd-toast { background: #272729; border-color: #6f7072; color: #f2f2f2; } }
   `;
   document.documentElement.append(style);
+}
+
+function showToast(action: InlineAction, message: string, tone: 'error' | 'warning'): void {
+  dismissToast(action);
+  const region = getToastRegion();
+  const toast = document.createElement('div');
+  toast.className = `rmd-toast rmd-toast--${tone}`;
+  toast.setAttribute('role', tone === 'error' ? 'alert' : 'status');
+  const text = document.createElement('span');
+  text.className = 'rmd-toast-message';
+  text.textContent = message;
+  const close = document.createElement('button');
+  close.type = 'button';
+  close.className = 'rmd-toast-close';
+  close.setAttribute('aria-label', 'Dismiss notification');
+  close.textContent = '×';
+  close.addEventListener('click', () => dismissToast(action));
+  toast.append(text, close);
+  region.append(toast);
+  action.toast = toast;
+  action.toastTimer = window.setTimeout(
+    () => dismissToast(action),
+    tone === 'error' ? ERROR_TOAST_DURATION_MS : WARNING_TOAST_DURATION_MS,
+  );
+}
+
+function dismissToast(action: InlineAction): void {
+  if (action.toastTimer !== undefined) window.clearTimeout(action.toastTimer);
+  action.toast?.remove();
+  delete action.toast;
+  delete action.toastTimer;
+}
+
+function getToastRegion(): HTMLElement {
+  const existing = document.getElementById('rmd-toast-region');
+  if (existing) return existing;
+  const region = document.createElement('div');
+  region.id = 'rmd-toast-region';
+  region.setAttribute('aria-label', 'Download notifications');
+  document.documentElement.append(region);
+  return region;
 }
 
 function formatDownloadError(error: SerializableError): string {
