@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.2.4 (2026-07-24)
+
+### Notable changes
+
+#### Stable inline download actions
+
+- Keep the old Reddit download action immediately after RES's `[l+c]` or `[l=c]` action, including
+  when RES adds its action after the page initially loads.
+- Show download errors and quality warnings as fixed, accessible notifications instead of expanding
+  the post action row.
+- Dismiss error notifications automatically after eight seconds while leaving the compact Retry
+  action and diagnostic tooltip available.
+
 ## 0.2.3 (2026-07-21)
 
 ### Notable changes

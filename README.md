@@ -17,6 +17,8 @@ A privacy-focused Firefox extension that finds supported videos in Reddit and do
 - Uses no analytics, accounts, browsing-history storage, external backend, or request interception.
 - Uses Firefox's installation permission prompt so Reddit buttons and provider downloads work
   immediately after access is approved.
+- Keeps old Reddit actions in a consistent position and reports download failures in auto-dismissing
+  notifications without shifting post rows.
 
 ## Development
 

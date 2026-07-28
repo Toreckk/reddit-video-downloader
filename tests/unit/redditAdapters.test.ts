@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CurrentRedditAdapter } from '@/src/surfaces/reddit/currentRedditAdapter';
 import { OldRedditAdapter } from '@/src/surfaces/reddit/oldRedditAdapter';
 import { InlineDownloadController } from '@/src/surfaces/reddit/inlineDownloadController';
@@ -7,6 +7,18 @@ import { ProviderRegistry } from '@/src/core/application/providerRegistry';
 import { RedgifsProvider } from '@/src/providers/redgifs';
 import { VRedditProvider } from '@/src/providers/vreddit';
 import type { HttpClient } from '@/src/core/infrastructure/extensionHttpClient';
+
+const browserMocks = vi.hoisted(() => ({
+  sendMessage: vi.fn(),
+}));
+
+vi.mock('wxt/browser', () => ({
+  browser: {
+    runtime: {
+      sendMessage: browserMocks.sendMessage,
+    },
+  },
+}));
 
 const oldFixture = readFileSync('tests/fixtures/reddit-old/listing.html', 'utf8');
 const oldSearchFixture = readFileSync('tests/fixtures/reddit-old/search.html', 'utf8');
@@ -17,8 +29,11 @@ const neverHttp: HttpClient = {
 
 describe('Reddit surface adapters', () => {
   beforeEach(() => {
+    vi.clearAllMocks();
     window.history.replaceState({}, '', 'https://www.reddit.com/r/test');
   });
+
+  afterEach(() => vi.useRealTimers());
 
   it('discovers old Reddit metadata and includes closed/open RES iframe URLs without mutating DOM', () => {
     document.body.innerHTML = oldFixture;
@@ -88,6 +103,69 @@ describe('Reddit surface adapters', () => {
     ).toBeNull();
     controller.stop();
     expect(document.querySelector('.rmd-inline-download')).toBeNull();
+  });
+
+  it('keeps the old Reddit action immediately after the RES [l+c] action', async () => {
+    document.body.innerHTML = `
+      <div class="thing link" data-fullname="t3_order" data-url="https://redgifs.com/watch/OrderClip">
+        <p class="title"><a class="title">Ordered post</a></p>
+        <ul class="flat-list buttons"><li class="comments">comments</li></ul>
+      </div>`;
+    const controller = new InlineDownloadController(
+      new ProviderRegistry([new RedgifsProvider(neverHttp)]),
+      [new OldRedditAdapter()],
+    );
+    controller.start();
+
+    const mount = document.querySelector<HTMLElement>('.flat-list.buttons');
+    mount?.insertAdjacentHTML(
+      'beforeend',
+      '<li class="res-combined"><a class="noCtrlF" data-text="[l+c]"></a></li>',
+    );
+
+    await vi.waitFor(() => {
+      expect(
+        document
+          .querySelector('.res-combined')
+          ?.nextElementSibling?.classList.contains('rmd-inline-action'),
+      ).toBe(true);
+    });
+    controller.stop();
+  });
+
+  it('shows download errors in an auto-dismissing toast without inline layout content', async () => {
+    document.body.innerHTML = `
+      <div class="thing link" data-fullname="t3_error" data-url="https://redgifs.com/watch/ErrorClip">
+        <p class="title"><a class="title">Error post</a></p>
+        <ul class="flat-list buttons"></ul>
+      </div>`;
+    browserMocks.sendMessage.mockResolvedValue({
+      ok: false,
+      error: {
+        code: 'NETWORK_ERROR',
+        message: 'Could not reach the media provider.',
+        details: 'Temporary failure',
+      },
+    });
+    const controller = new InlineDownloadController(
+      new ProviderRegistry([new RedgifsProvider(neverHttp)]),
+      [new OldRedditAdapter()],
+    );
+    controller.start();
+    vi.useFakeTimers();
+
+    document.querySelector<HTMLButtonElement>('.rmd-inline-download')?.click();
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(document.querySelector('.rmd-inline-status')).toBeNull();
+    expect(document.querySelector('[role="alert"]')?.textContent).toContain(
+      'Could not reach the media provider. Detail: Temporary failure [NETWORK_ERROR]',
+    );
+    expect(document.querySelector('.rmd-inline-download')?.textContent).toBe('retry');
+
+    await vi.advanceTimersByTimeAsync(8000);
+    expect(document.querySelector('[role="alert"]')).toBeNull();
+    controller.stop();
   });
 
   it('discovers old Reddit search cards and mounts actions in their metadata rows', () => {

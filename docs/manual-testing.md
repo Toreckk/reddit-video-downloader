@@ -44,6 +44,11 @@ development host grants, so permission behavior must always be accepted once wit
     `{sourceCreator|creator} - {title}`.
 13. On Firefox for Android, confirm downloads use the normal Android behavior without failing when
     **Always ask where to save** is enabled.
+14. With RES singleClick enabled on old Reddit, confirm **download** stays immediately after `[l+c]`
+    (or `[l=c]`) on initial and dynamically loaded posts.
+15. Force a provider failure. Confirm the post row does not expand, an error notification appears in
+    the lower-right corner, **retry** remains available, and the notification dismisses after eight
+    seconds or when its close button is selected.
 
 ## Inspecting download errors
 
